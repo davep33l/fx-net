@@ -1,6 +1,11 @@
+# Build in imports
 import random
 import csv
 from datetime import timedelta, datetime
+import os
+
+# Project built imports
+from constants import TRADE_DATA_OUTPUT_FOLDER
 
 CLIENTS = {
     'Capital Trading' : ['Max Scott', 'Ava Lee'],
@@ -47,7 +52,6 @@ BANK_TRADERS = [
     "Mike Taylor",
     "Emily Wilson"
 ]
-
 
 def create_trade_data(trade_date, quantity_of_trades):
 
@@ -147,7 +151,9 @@ def create_trade_data(trade_date, quantity_of_trades):
 
 def write_to_csv(full_data):
 
-    with open(f'trade_data_{full_data[1][-3]}.csv', 'w', newline='') as file:
+    file_name = os.path.join(TRADE_DATA_OUTPUT_FOLDER, f'trade_data_{full_data[1][-3]}.csv')
+    
+    with open(file_name, 'w', newline='') as file:
         writer = csv.writer(file)
     
         for index in range(len(full_data)):
@@ -156,5 +162,3 @@ def write_to_csv(full_data):
 
     return True
 
-result = create_trade_data("20240131", 10)
-write_to_csv(result)
