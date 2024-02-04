@@ -2,6 +2,7 @@
 import os
 import platform
 import random
+from datetime import timedelta, datetime
 
 # Third party library imports
 import gspread
@@ -44,23 +45,84 @@ def main():
         print("from the upstream application, please run the following")
         print("trade simulation program to generate the trade data.\n")
 
-        response = input("Please press Y proceed and hit enter: ")
-        if response.lower() == "y":
-            print("you pressed yes")
+        print("1. Proceed with creating simulated data")
+        print("2. To Exit the program")
+
+        response = input("Press a number and enter to continue: ")
+        if response.lower() == "1":
+            print("You selected option 1")
             result = create_trade_data(trading_app_sys_date, int(random.uniform(50,150)))
-            create_output_file(result)
+            file_id = create_output_file(result)
+            print("Data has been successfully generated and saved")
+            update_system_date()
+            print("System Date of the trading application has now been rolled")
             break
-        elif response.lower() == "n":
-            print("you pressed no")
-            break
+        elif response.lower() == "2":
+            print("You selected option 2")
+            print("The program is now exiting")
+            raise SystemExit
         else:
+            print("Incorrect input, please select valid option")
             if platform.system() == "Windows":
                 os.system("cls")
             else:
                 os.system("clear")
-            print("your input was incorrect, please press Y or N")
+
+    while True:
+        print("Do you want to load the data into FX Net program\n")
+        print("1. Yes, load data")
+        print("2. Exit the program")
+
+        response = input("Press a number and enter to continue: ")
+        if response.lower() == "1":
+            print("You selected option 1")
+            output_file = GSPREAD_CLIENT.open_by_key(file_id)
+            data_to_move = output_file.sheet1.get_all_values()
+            TRADES_DATA_WS.append_rows(data_to_move[1:])
+            print("Data has been successfully loaded into FX Net database")
+            break
+        elif response.lower() == "2":
+            print("You selected option 2")
+            print("The program is now exiting")
+            raise SystemExit
+        else:
+            print("Incorrect input, please select valid option")
+            if platform.system() == "Windows":
+                os.system("cls")
+            else:
+                os.system("clear")
+
+    while True:
+
+        print("welcome to the analsyis menu")
+        print("1. Create Netting report")
+        print("2. Create payment files")
+        print("3. Show trade count by clients")
+        print("4. Show trade count by client and client trader")
+        print("5. Show trade count by bank trader")
+        print("6. Exit program")
+
+        response = input("Please select an option and press enter: ")
+
+        if response == "1":
+            pass
+        elif response == "2":
+            pass
+        elif response == "3":
+            pass
+        elif response == "4":
+            pass
+        elif response == "5":
+            pass
+        elif response == "6":
+            print("Exiting program")
+            raise SystemExit
 
 def create_output_file(data):
+    """
+    Creates the new file, saves it in google drive and returns 
+    the file id
+    """
 
     new_file_name = f'trade_data_{data[1][-3]}'
 
@@ -85,6 +147,8 @@ def create_output_file(data):
         sheet = workbook.sheet1
         sheet.append_rows(data)
 
+        return new_file["id"]
+
     except Exception as e:
         print(f'Error creating new file: {e}')
 
@@ -108,9 +172,19 @@ def show_file_list():
         for file in files:
             print(f"{file['name']} ({file['id']})")
 
+def update_system_date():
+    trading_app_sys_date_ISO_format = datetime.strptime(trading_app_sys_date, "%Y%m%d")
+
+    new_trading_app_sys_date = trading_app_sys_date_ISO_format + timedelta(1)
+
+    while new_trading_app_sys_date.weekday() >= 5:
+        new_trading_app_sys_date += timedelta(days=1)
+
+    sys_date_string = new_trading_app_sys_date.strftime("%Y%m%d")
+    SYSTEM_INFO_WS.update_acell('A2', sys_date_string)
+
 if __name__ == "__main__":
     main()
-    show_file_list()
 
 
 
