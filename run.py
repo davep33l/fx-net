@@ -9,10 +9,12 @@ from datetime import timedelta, datetime
 from rich.console import Console
 from rich.table import Table
 import pandas as pd
+from rich import print as rprint
 
 # Project built imports
 from trade_file_generation import create_trade_data
 from google_client_manager import get_google_clients
+import menus
 
 GSPREAD_CLIENT, GDRIVE_CLIENT = get_google_clients()
 DATABASE_WORKBOOK = GSPREAD_CLIENT.open('fx-net-data')
@@ -28,33 +30,35 @@ def main():
 
     while True:
 
-        print("Welcome to FX NET\n")
-        print("To simulate the output of end of day trading data")
-        print("from the upstream application, please run the following")
-        print("trade simulation program to generate the trade data.\n")
+        rprint("[cyan]Welcome to FX NET\n")
+        rprint("[cyan]To simulate the output of end of day trading data")
+        rprint("[cyan]from the upstream application, please run the following")
+        rprint("[cyan]trade simulation program to generate the trade data.\n")
 
-        print("1. Proceed with creating simulated data")
-        print("2. To Exit the program")
+        rprint(f"[cyan]Current System Date is[/cyan] [green]{trading_app_sys_date}\n")
 
-        response = input("Press a number and enter to continue: ")
-        if response.lower() == "1":
-            print("You selected option 1")
-            result = create_trade_data(trading_app_sys_date, int(random.uniform(50,150)))
-            file_id = create_output_file(result)
+        response = menus.menu(menus.menu_1_question, menus.menu_1_choices)
+    
+        if response == "Yes":
+
+            rprint("[red]Generating trade file...please wait")
+
+            data, file_name = create_trade_data(trading_app_sys_date, int(random.uniform(50,150)))
+            file_id = create_output_file(data, file_name)
+
             print("Data has been successfully generated and saved")
+
             update_system_date()
+
             print("System Date of the trading application has now been rolled")
+
             break
-        elif response.lower() == "2":
-            print("You selected option 2")
-            print("The program is now exiting")
+
+        elif response == "No":
+
+            rprint("[red]The program is now exiting")
+
             raise SystemExit
-        else:
-            print("Incorrect input, please select valid option")
-            if platform.system() == "Windows":
-                os.system("cls")
-            else:
-                os.system("clear")
 
     while True:
         print("Do you want to load the data into FX Net program\n")
@@ -106,18 +110,16 @@ def main():
             print("Exiting program")
             raise SystemExit
 
-def create_output_file(data):
+def create_output_file(data, file_name):
     """
     Creates the new file, saves it in google drive and returns 
     the file id
     """
 
-    new_file_name = f'trade_data_{data[1][-3]}'
-
     try:
         # Create a new file
         new_file_metadata = {
-            'name': new_file_name,
+            'name': file_name,
             'mimeType': 'application/vnd.google-apps.spreadsheet',
         }
 
@@ -135,10 +137,10 @@ def create_output_file(data):
         sheet = workbook.sheet1
         sheet.append_rows(data)
 
-        return new_file["id"]
-
     except Exception as e:
         print(f'Error creating new file: {e}')
+    
+    return new_file["id"]
 
 def delete_file(file_id):
 

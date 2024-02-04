@@ -58,7 +58,10 @@ def create_trade_data(trade_date, quantity_of_trades):
     quantity: This should be passed in as in integer (e.g. if you want to 
     produce 10 random trades, pass in the integer 10)
 
-    Returns: A list of trade data
+    Raises ValueError if the date or quantity is incorrect
+
+    Returns: A list which contains a list of trade data (including headers)
+    and the file name.
     """
 
     # Error checking
@@ -140,8 +143,11 @@ def create_trade_data(trade_date, quantity_of_trades):
         channel = random.choice(CHANNELS)
 
         trade_data_list = [client, client_trader, bank_trader, trade_id, ccy_pair, buy_ccy, buy_amt, rate, sell_ccy, sell_amt, trade_date_string, value_date_string, channel]
+        
+        # Return values
         full_data.append(trade_data_list)
+        file_name = f'trade_data_{trade_date}'
 
-    return full_data
+    return full_data, file_name
 
 
