@@ -5,31 +5,16 @@ import random
 from datetime import timedelta, datetime
 
 # Third party library imports
-import gspread
-from google.oauth2.service_account import Credentials
-from googleapiclient.discovery import build
+
 from rich.console import Console
 from rich.table import Table
 import pandas as pd
 
 # Project built imports
 from trade_file_generation import create_trade_data
+from google_client_manager import get_google_clients
 
-SCOPE = [
-    "https://www.googleapis.com/auth/spreadsheets",
-    "https://www.googleapis.com/auth/drive.file",
-    "https://www.googleapis.com/auth/drive"
-    ]
-
-
-CREDS = Credentials.from_service_account_file('creds.json')
-SCOPED_CREDS = CREDS.with_scopes(SCOPE)
-
-# Google Sheets and Drive client connections
-GSPREAD_CLIENT = gspread.authorize(SCOPED_CREDS)
-GDRIVE_CLIENT = build('drive', 'v3',credentials=SCOPED_CREDS)
-
-# Main Database workbook connection
+GSPREAD_CLIENT, GDRIVE_CLIENT = get_google_clients()
 DATABASE_WORKBOOK = GSPREAD_CLIENT.open('fx-net-data')
 
 # Worksheet connections
@@ -108,7 +93,7 @@ def main():
         response = input("Please select an option and press enter: ")
 
         if response == "1":
-            pass
+            create_table()
         elif response == "2":
             pass
         elif response == "3":
@@ -192,10 +177,10 @@ def create_table():
 
     trade_table = Table(title="\n\nFX Netting Data")
 
-    trade_table.add_column("Client", justify="center", style="white", no_wrap=True)
+    trade_table.add_column("Client", justify="center", style="green", no_wrap=True)
     trade_table.add_column("CCY", justify="center", style="cyan")
-    trade_table.add_column("Net Buy", justify="center", style="green")
-    trade_table.add_column("Net Sell", justify="center", style="red")
+    # trade_table.add_column("Net Buy", justify="center", style="green")
+    # trade_table.add_column("Net Sell", justify="center", style="red")
     trade_table.add_column("Overall Net", justify="center", style="white")
     trade_table.add_column("Actions", justify="center", style="white")
 
@@ -220,15 +205,17 @@ def create_table():
             else:
                 action = f"receive {ccy}"
 
-            trade_table.add_row(client, ccy, "{:,.2f}".format(buy_sum), "{:,.2f}".format(sell_sum), "{:,.2f}".format(net), action)
+            # trade_table.add_row(client, ccy, "{:,.2f}".format(buy_sum), "{:,.2f}".format(sell_sum), "{:,.2f}".format(net), action)
+            trade_table.add_row(client, ccy, "{:,.2f}".format(net), action)
+
         
     console = Console()
     console.print(trade_table)
 
 
 if __name__ == "__main__":
-    # main()
-    create_table()
+    main()
+    # create_table()
 
 
 
