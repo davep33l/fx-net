@@ -8,6 +8,9 @@ from datetime import timedelta, datetime
 import gspread
 from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
+from rich.console import Console
+from rich.table import Table
+import pandas as pd
 
 # Project built imports
 from trade_file_generation import create_trade_data
@@ -183,8 +186,49 @@ def update_system_date():
     sys_date_string = new_trading_app_sys_date.strftime("%Y%m%d")
     SYSTEM_INFO_WS.update_acell('A2', sys_date_string)
 
+def create_table():
+    trades_data = TRADES_DATA_WS.get_all_values()
+    df = pd.DataFrame(trades_data[1:],columns=trades_data[0])
+
+    trade_table = Table(title="\n\nFX Netting Data")
+
+    trade_table.add_column("Client", justify="center", style="white", no_wrap=True)
+    trade_table.add_column("CCY", justify="center", style="cyan")
+    trade_table.add_column("Net Buy", justify="center", style="green")
+    trade_table.add_column("Net Sell", justify="center", style="red")
+    trade_table.add_column("Overall Net", justify="center", style="white")
+    trade_table.add_column("Actions", justify="center", style="white")
+
+    df['BUY_AMT'] = pd.to_numeric(df['BUY_AMT'], errors='coerce')
+    df['SELL_AMT'] = pd.to_numeric(df['SELL_AMT'], errors='coerce')
+
+    unique_clients = df['CLIENT_NAME'].unique()
+    unique_buy_ccys = list(df["BUY_CCY"].unique())
+    unique_sell_ccys = list(df['SELL_CCY'].unique())
+    unique_all_ccys = sorted(set(unique_buy_ccys + unique_sell_ccys))
+
+    for client in unique_clients:
+        for ccy in unique_all_ccys:
+            buy_col = df.query('CLIENT_NAME == @client and BUY_CCY == @ccy')
+            sell_col = df.query('CLIENT_NAME == @client and SELL_CCY == @ccy')
+            buy_sum = round(buy_col['BUY_AMT'].sum(),2)
+            sell_sum = round(sell_col['SELL_AMT'].sum(),2)
+            net = round(buy_sum + sell_sum,2)
+
+            if net < 0:
+                action = f"pay {ccy}"
+            else:
+                action = f"receive {ccy}"
+
+            trade_table.add_row(client, ccy, "{:,.2f}".format(buy_sum), "{:,.2f}".format(sell_sum), "{:,.2f}".format(net), action)
+        
+    console = Console()
+    console.print(trade_table)
+
+
 if __name__ == "__main__":
-    main()
+    # main()
+    create_table()
 
 
 
