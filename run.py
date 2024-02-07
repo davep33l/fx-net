@@ -76,7 +76,8 @@ def main():
         response = menus.menu(menus.menu_3_question, menus.menu_3_choices)
 
         if response == menus.menu_3_choices[0]:
-            create_table()
+            date = get_most_recent_file()
+            create_table(date)
         elif response == menus.menu_3_choices[1]:
             pass
         elif response == menus.menu_3_choices[2]:
@@ -152,9 +153,10 @@ def update_system_date():
     sys_date_string = new_trading_app_sys_date.strftime("%Y%m%d")
     SYSTEM_INFO_WS.update_acell('A2', sys_date_string)
 
-def create_table():
+def create_table(date):
     trades_data = TRADES_DATA_WS.get_all_values()
     df = pd.DataFrame(trades_data[1:],columns=trades_data[0])
+    df = df[df["VALUE_DATE"] == date]
 
     trade_table = Table(title="\n\nFX Netting Data")
 
@@ -189,10 +191,15 @@ def create_table():
             # trade_table.add_row(client, ccy, "{:,.2f}".format(buy_sum), "{:,.2f}".format(sell_sum), "{:,.2f}".format(net), action)
             trade_table.add_row(client, ccy, "{:,.2f}".format(net), action)
 
-        
+    
     console = Console()
     console.print(trade_table)
 
+def get_most_recent_file():
+    trades_data = TRADES_DATA_WS.get_all_values()
+    df = pd.DataFrame(trades_data[1:],columns=trades_data[0])
+    unique_value_dates = df['VALUE_DATE'].unique()
+    return unique_value_dates[-1]
 
 if __name__ == "__main__":
     main()
