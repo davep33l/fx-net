@@ -6,6 +6,18 @@ __pycache__/
 *.py[cod]
 node_modules/
 .github/
+
+# Python modules do not need pushing as they will be installed
+# based on the requirements.txt
 venv
+
+# Credential files and sensative information
 creds.json
 application_creds.md
+
+# Files/folders to ignore that were created when deploying locally 
+# using Heroku Local and needing to install the packages via npm install
+node_modules
+index.js.json
+package-lock.json
+tmp

@@ -28,86 +28,65 @@ trading_app_sys_date = SYSTEM_INFO_WS.range("A2")[0].value
 
 def main():  
 
+    # First Menu
     while True:
 
         rprint("[cyan]Welcome to FX NET\n")
         rprint("[cyan]To simulate the output of end of day trading data")
         rprint("[cyan]from the upstream application, please run the following")
-        rprint("[cyan]trade simulation program to generate the trade data.\n")
-
+        rprint("[cyan]trade simulation program to generate the trade data.")
+        rprint("[red]System Date of the Trading App will automatically be")
+        rprint("[red]rolled to the next day\n")    
         rprint(f"[cyan]Current System Date is[/cyan] [green]{trading_app_sys_date}\n")
 
         response = menus.menu(menus.menu_1_question, menus.menu_1_choices)
     
-        if response == "Yes":
-
-            rprint("[red]Generating trade file...please wait")
-
+        if response == menus.menu_1_choices[0]:
+            rprint("[green]Generating trade file...please wait")
             data, file_name = create_trade_data(trading_app_sys_date, int(random.uniform(50,150)))
             file_id = create_output_file(data, file_name)
-
-            print("Data has been successfully generated and saved")
-
+            rprint("[green]Data has been successfully generated and saved")
             update_system_date()
-
-            print("System Date of the trading application has now been rolled")
-
+            rprint("[green]System Date of the trading application has now been rolled")
             break
-
-        elif response == "No":
-
+        elif response == menus.menu_1_choices[1]:
             rprint("[red]The program is now exiting")
-
             raise SystemExit
 
+    # Second Menus
     while True:
-        print("Do you want to load the data into FX Net program\n")
-        print("1. Yes, load data")
-        print("2. Exit the program")
 
-        response = input("Press a number and enter to continue: ")
-        if response.lower() == "1":
-            print("You selected option 1")
+        response = menus.menu(menus.menu_2_question, menus.menu_2_choices)
+    
+        if response == menus.menu_2_choices[0]:
+            rprint("[green]Loading data to FX Net database...please wait")
             output_file = GSPREAD_CLIENT.open_by_key(file_id)
             data_to_move = output_file.sheet1.get_all_values()
             TRADES_DATA_WS.append_rows(data_to_move[1:])
-            print("Data has been successfully loaded into FX Net database")
+            rprint("[green]Data has been successfully loaded into FX Net database")
             break
-        elif response.lower() == "2":
-            print("You selected option 2")
-            print("The program is now exiting")
+        elif response == menus.menu_2_choices[1]:
+            rprint("[red]The program is now exiting")
             raise SystemExit
-        else:
-            print("Incorrect input, please select valid option")
-            if platform.system() == "Windows":
-                os.system("cls")
-            else:
-                os.system("clear")
 
+    # Third Menu
     while True:
 
-        print("welcome to the analsyis menu")
-        print("1. Create Netting report")
-        print("2. Create payment files")
-        print("3. Show trade count by clients")
-        print("4. Show trade count by client and client trader")
-        print("5. Show trade count by bank trader")
-        print("6. Exit program")
+        rprint("\nWelcome to the analsyis menu\n")
+        response = menus.menu(menus.menu_3_question, menus.menu_3_choices)
 
-        response = input("Please select an option and press enter: ")
-
-        if response == "1":
+        if response == menus.menu_3_choices[0]:
             create_table()
-        elif response == "2":
+        elif response == menus.menu_3_choices[1]:
             pass
-        elif response == "3":
+        elif response == menus.menu_3_choices[2]:
             pass
-        elif response == "4":
+        elif response == menus.menu_3_choices[3]:
             pass
-        elif response == "5":
+        elif response == menus.menu_3_choices[4]:
             pass
-        elif response == "6":
-            print("Exiting program")
+        elif response == menus.menu_3_choices[5]:
+            rprint("[red]Exiting program")
             raise SystemExit
 
 def create_output_file(data, file_name):
@@ -218,6 +197,6 @@ def create_table():
 if __name__ == "__main__":
     main()
     # create_table()
-
-
-
+    # trades_data = TRADES_DATA_WS.get_all_values()
+    # df = pd.DataFrame(trades_data[1:],columns=trades_data[0])
+    # print(df['VALUE_DATE'].unique())
