@@ -1,6 +1,6 @@
 # Build in imports
-import os
-import platform
+# import os
+# import platform
 import random
 from datetime import timedelta, datetime
 
@@ -26,7 +26,10 @@ SYSTEM_INFO_WS = DATABASE_WORKBOOK.worksheet("SYSTEM_INFO")
 # Variable connections from worksheets
 trading_app_sys_date = SYSTEM_INFO_WS.range("A2")[0].value
 
-def main():  
+def main():
+    '''
+    This function controls the menu system
+    '''
 
     # First Menu
     while True:
@@ -55,7 +58,10 @@ def main():
 
     # Second Menus
     while True:
-
+        # TODO: Remove the option to exit as naturally you will want to load the data in
+        #       or change this so the user can select a file to upload or to exit, which will
+        #       help with the data that gets loaded and allow to load data you know is missing 
+        #       by selecting another file
         response = menus.menu(menus.menu_2_question, menus.menu_2_choices)
     
         if response == menus.menu_2_choices[0]:
@@ -129,18 +135,34 @@ def delete_file(file_id):
         print(f'File with ID {file_id} successfully deleted.')
 
     except Exception as e:
-        print(f'Error deleting folder: {e}')
+        print(f'Error deleting file: {e}')
 
-def show_file_list():
+def get_file_list(file_name_filter=None):
 
-    print('Files in Google Drive:')
+    list_of_files = []
+    if file_name_filter == None:
+        notification = "with no filter"
+    else:
+        notification = f'with filter of "{file_name_filter}"'
+    print(f'Files in Google Drive {notification}:')
     results = GDRIVE_CLIENT.files().list().execute()
     files = results.get('files', [])
     if not files:
         print('No files found in Google Drive.')
     else:
         for file in files:
-            print(f"{file['name']} ({file['id']})")
+            if file_name_filter == None:
+                print(f"{file['name']} ({file['id']})")
+                # list_of_files.append((file['name'], file['id']))
+                list_of_files.append((file['id']))
+
+            elif file["name"].startswith(file_name_filter):
+                print(f"{file['name']} ({file['id']})")
+                # list_of_files.append((file['name'], file['id']))
+                list_of_files.append((file['id']))
+
+    return list_of_files
+
 
 def update_system_date():
     trading_app_sys_date_ISO_format = datetime.strptime(trading_app_sys_date, "%Y%m%d")
@@ -158,7 +180,7 @@ def create_table(date):
     df = pd.DataFrame(trades_data[1:],columns=trades_data[0])
     df = df[df["VALUE_DATE"] == date]
 
-    trade_table = Table(title="\n\nFX Netting Data")
+    trade_table = Table(title=f"\n\nFX Netting Data for {date}")
 
     trade_table.add_column("Client", justify="center", style="green", no_wrap=True)
     trade_table.add_column("CCY", justify="center", style="cyan")
@@ -202,8 +224,8 @@ def get_most_recent_file():
     return unique_value_dates[-1]
 
 if __name__ == "__main__":
-    main()
-    # create_table()
-    # trades_data = TRADES_DATA_WS.get_all_values()
-    # df = pd.DataFrame(trades_data[1:],columns=trades_data[0])
-    # print(df['VALUE_DATE'].unique())
+    # main()
+    files = get_file_list("trade_data")
+    for file in files:
+        delete_file(file)
+    files = get_file_list()
