@@ -15,7 +15,7 @@ from rich import print as rprint
 # Project built imports
 from google_client_manager import get_google_clients
 import menus
-import trading_app as ta
+
 
 GSPREAD_CLIENT, GDRIVE_CLIENT = get_google_clients()
 DATABASE_WORKBOOK = GSPREAD_CLIENT.open('fx-net-data')
@@ -48,8 +48,8 @@ def main():
             rprint("[green]Generating trade file...please wait")
             # data, file_name = create_trade_data(trading_app_sys_date, int(random.uniform(50,150)))
             # file_id = create_output_file(data, file_name)
-            data, file = ta.create_simulated_trade_data(trading_app_sys_date, int(random.uniform(50,150)))
-            file_id = ta.create_and_save_output_file(data, file, get_google_clients())
+            data, file = trading_simulator.create_simulated_trade_data(trading_app_sys_date, int(random.uniform(50,150)))
+            file_id = trading_simulator.create_and_save_output_file(data, file, get_google_clients())
 
             rprint("[green]Data has been successfully generated and saved")
             update_system_date()
@@ -102,7 +102,7 @@ def main():
             rprint("[red]Exiting program")
             raise SystemExit
 
-
+# move to either utils or to fx_net folder
 def delete_file(file_id):
 
     try:
@@ -112,6 +112,7 @@ def delete_file(file_id):
     except Exception as e:
         print(f'Error deleting file: {e}')
 
+# move to either utils or to fx_net folder
 def get_file_list(file_name_filter=None):
 
     list_of_files = []
@@ -138,7 +139,7 @@ def get_file_list(file_name_filter=None):
 
     return list_of_files
 
-
+# move this to trading simulator
 def update_system_date():
     trading_app_sys_date_ISO_format = datetime.strptime(trading_app_sys_date, "%Y%m%d")
 
@@ -150,6 +151,7 @@ def update_system_date():
     sys_date_string = new_trading_app_sys_date.strftime("%Y%m%d")
     SYSTEM_INFO_WS.update_acell('A2', sys_date_string)
 
+# move to fx_net folder
 def create_table(date):
     trades_data = TRADES_DATA_WS.get_all_values()
     df = pd.DataFrame(trades_data[1:],columns=trades_data[0])
@@ -192,12 +194,14 @@ def create_table(date):
     console = Console()
     console.print(trade_table)
 
+# move to fx_net folder
 def get_most_recent_file():
     trades_data = TRADES_DATA_WS.get_all_values()
     df = pd.DataFrame(trades_data[1:],columns=trades_data[0])
     unique_value_dates = df['VALUE_DATE'].unique()
     return unique_value_dates[-1]
 
+# move to fx_net folder
 def create_report_spreadsheet(value_date):
     """
     Creates the new file, saves it in google drive and returns 
@@ -248,7 +252,9 @@ def create_report_spreadsheet(value_date):
     
     return new_file["id"]
 
-from app_selector import app_selector
+from _app_selector import app_selector
+from _trading_simulator import trading_simulator_menu, trading_simulator
+from _utils import utils
 
 def run():
 
@@ -257,37 +263,42 @@ def run():
     if response == app_selector.choices[0]:
         os.system("clear")
         rprint("[green]Opening the Trading Simulator")
-        please_wait()
-        rprint("[green]Trading App is open") # call the trading app here
+        utils.please_wait()
+        rprint("[green]Trading App is open")
+        time.sleep(2)
+        os.system("clear")
+        ts_response = trading_simulator_menu.run()
+        if ts_response == trading_simulator_menu.choices[0]:
+            rprint("[green]Generating trade file...please wait")
+            data, file = trading_simulator.create_simulated_trade_data(trading_app_sys_date, int(random.uniform(50,150)))
+            trading_simulator.create_and_save_output_file(data, file, get_google_clients())
+            rprint("[green]Data has been successfully generated and saved")
+            update_system_date()
+            rprint("[green]System Date of the trading application has now been rolled")
+        elif ts_response == trading_simulator_menu.choices[1]:
+            rprint("[red]The program is now exiting")
+            utils.please_wait()
+            rprint("Goodbye!")
+            time.sleep(1)
+            os.system("clear")
+            raise SystemExit
     elif response == app_selector.choices[1]:
-        rprint("[green]Opening the FX Net Application") 
+        rprint("[green]Opening the FX Net Application")
+        utils.please_wait()
+        rprint("[green]FX Net is open") # call the FX Net app here
     elif response == app_selector.choices[2]:
         rprint("[red]The program is now exiting")
+        utils.please_wait()
+        rprint("Goodbye!")
+        time.sleep(1)
+        os.system("clear")
         raise SystemExit
 
     input("Press any key to exit: ")
 
-def please_wait():
-    time.sleep(1)
-    os.system("clear")
-    time.sleep(1)
-    rprint("[green]Please wait.")
-    time.sleep(1)
-    os.system("clear")
-    rprint("[green]Please wait..")
-    time.sleep(1)
-    os.system("clear")
-    rprint("[green]Please wait...")
-    time.sleep(1)
-    os.system("clear")
 
 if __name__ == "__main__":
     run()
-
-
-
-
-
     # main()
     # # files = get_file_list("netting_report")
     # files = get_file_list("trade_data")
