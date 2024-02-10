@@ -1,5 +1,6 @@
 # Build in imports
-# import os
+import os
+import time
 # import platform
 import random
 from datetime import timedelta, datetime
@@ -14,7 +15,7 @@ from rich import print as rprint
 # Project built imports
 from google_client_manager import get_google_clients
 import menus
-import trading_simulator.trading_app as ta
+import trading_app as ta
 
 GSPREAD_CLIENT, GDRIVE_CLIENT = get_google_clients()
 DATABASE_WORKBOOK = GSPREAD_CLIENT.open('fx-net-data')
@@ -101,37 +102,6 @@ def main():
             rprint("[red]Exiting program")
             raise SystemExit
 
-# def create_output_file(data, file_name):
-#     """
-#     Creates the new file, saves it in google drive and returns 
-#     the file id
-#     """
-
-#     try:
-#         # Create a new file
-#         new_file_metadata = {
-#             'name': file_name,
-#             'mimeType': 'application/vnd.google-apps.spreadsheet',
-#         }
-
-#         permissions = {
-#             'type': 'user',
-#             'role': 'writer',
-#             'emailAddress': 'davidpeel.test1@gmail.com',
-#         }
-
-#         new_file = GDRIVE_CLIENT.files().create(body=new_file_metadata).execute()
-#         GDRIVE_CLIENT.permissions().create(fileId=new_file['id'],body=permissions).execute()
-#         print(f'File created with ID: {new_file["id"]}')
-
-#         workbook = GSPREAD_CLIENT.open_by_key(new_file["id"])
-#         sheet = workbook.sheet1
-#         sheet.append_rows(data)
-
-#     except Exception as e:
-#         print(f'Error creating new file: {e}')
-    
-#     return new_file["id"]
 
 def delete_file(file_id):
 
@@ -278,9 +248,47 @@ def create_report_spreadsheet(value_date):
     
     return new_file["id"]
 
+from app_selector import app_selector
+
+def run():
+
+    response = app_selector.run()
+
+    if response == app_selector.choices[0]:
+        os.system("clear")
+        rprint("[green]Opening the Trading Simulator")
+        please_wait()
+        rprint("[green]Trading App is open") # call the trading app here
+    elif response == app_selector.choices[1]:
+        rprint("[green]Opening the FX Net Application") 
+    elif response == app_selector.choices[2]:
+        rprint("[red]The program is now exiting")
+        raise SystemExit
+
+    input("Press any key to exit: ")
+
+def please_wait():
+    time.sleep(1)
+    os.system("clear")
+    time.sleep(1)
+    rprint("[green]Please wait.")
+    time.sleep(1)
+    os.system("clear")
+    rprint("[green]Please wait..")
+    time.sleep(1)
+    os.system("clear")
+    rprint("[green]Please wait...")
+    time.sleep(1)
+    os.system("clear")
 
 if __name__ == "__main__":
-    main()
+    run()
+
+
+
+
+
+    # main()
     # # files = get_file_list("netting_report")
     # files = get_file_list("trade_data")
 
