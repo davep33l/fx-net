@@ -12,9 +12,9 @@ import pandas as pd
 from rich import print as rprint
 
 # Project built imports
-from trade_file_generation import create_trade_data
 from google_client_manager import get_google_clients
 import menus
+import trading_simulator.trading_app as ta
 
 GSPREAD_CLIENT, GDRIVE_CLIENT = get_google_clients()
 DATABASE_WORKBOOK = GSPREAD_CLIENT.open('fx-net-data')
@@ -30,7 +30,6 @@ def main():
     '''
     This function controls the menu system
     '''
-
     # First Menu
     while True:
 
@@ -46,8 +45,11 @@ def main():
     
         if response == menus.menu_1_choices[0]:
             rprint("[green]Generating trade file...please wait")
-            data, file_name = create_trade_data(trading_app_sys_date, int(random.uniform(50,150)))
-            file_id = create_output_file(data, file_name)
+            # data, file_name = create_trade_data(trading_app_sys_date, int(random.uniform(50,150)))
+            # file_id = create_output_file(data, file_name)
+            data, file = ta.create_simulated_trade_data(trading_app_sys_date, int(random.uniform(50,150)))
+            file_id = ta.create_and_save_output_file(data, file, get_google_clients())
+
             rprint("[green]Data has been successfully generated and saved")
             update_system_date()
             rprint("[green]System Date of the trading application has now been rolled")
@@ -85,6 +87,7 @@ def main():
             date = get_most_recent_file()
             create_table(date)
         elif response == menus.menu_3_choices[1]:
+            # create_report_spreadsheet("20240625")
             pass
         elif response == menus.menu_3_choices[2]:
             pass
@@ -93,40 +96,42 @@ def main():
         elif response == menus.menu_3_choices[4]:
             pass
         elif response == menus.menu_3_choices[5]:
+            pass
+        elif response == menus.menu_3_choices[6]:
             rprint("[red]Exiting program")
             raise SystemExit
 
-def create_output_file(data, file_name):
-    """
-    Creates the new file, saves it in google drive and returns 
-    the file id
-    """
+# def create_output_file(data, file_name):
+#     """
+#     Creates the new file, saves it in google drive and returns 
+#     the file id
+#     """
 
-    try:
-        # Create a new file
-        new_file_metadata = {
-            'name': file_name,
-            'mimeType': 'application/vnd.google-apps.spreadsheet',
-        }
+#     try:
+#         # Create a new file
+#         new_file_metadata = {
+#             'name': file_name,
+#             'mimeType': 'application/vnd.google-apps.spreadsheet',
+#         }
 
-        permissions = {
-            'type': 'user',
-            'role': 'writer',
-            'emailAddress': 'davidpeel.test1@gmail.com',
-        }
+#         permissions = {
+#             'type': 'user',
+#             'role': 'writer',
+#             'emailAddress': 'davidpeel.test1@gmail.com',
+#         }
 
-        new_file = GDRIVE_CLIENT.files().create(body=new_file_metadata).execute()
-        GDRIVE_CLIENT.permissions().create(fileId=new_file['id'],body=permissions).execute()
-        print(f'File created with ID: {new_file["id"]}')
+#         new_file = GDRIVE_CLIENT.files().create(body=new_file_metadata).execute()
+#         GDRIVE_CLIENT.permissions().create(fileId=new_file['id'],body=permissions).execute()
+#         print(f'File created with ID: {new_file["id"]}')
 
-        workbook = GSPREAD_CLIENT.open_by_key(new_file["id"])
-        sheet = workbook.sheet1
-        sheet.append_rows(data)
+#         workbook = GSPREAD_CLIENT.open_by_key(new_file["id"])
+#         sheet = workbook.sheet1
+#         sheet.append_rows(data)
 
-    except Exception as e:
-        print(f'Error creating new file: {e}')
+#     except Exception as e:
+#         print(f'Error creating new file: {e}')
     
-    return new_file["id"]
+#     return new_file["id"]
 
 def delete_file(file_id):
 
@@ -223,9 +228,65 @@ def get_most_recent_file():
     unique_value_dates = df['VALUE_DATE'].unique()
     return unique_value_dates[-1]
 
+def create_report_spreadsheet(value_date):
+    """
+    Creates the new file, saves it in google drive and returns 
+    the file id
+    """
+
+    try:
+        # Create a new file
+        new_file_metadata = {
+            'name': f'netting_report_vd_{value_date}',
+            'mimeType': 'application/vnd.google-apps.spreadsheet',
+        }
+
+        permissions = {
+            'type': 'user',
+            'role': 'writer',
+            'emailAddress': 'davidpeel.test1@gmail.com',
+        }
+
+        new_file = GDRIVE_CLIENT.files().create(body=new_file_metadata).execute()
+        GDRIVE_CLIENT.permissions().create(fileId=new_file['id'],body=permissions).execute()
+        print(f'File created with ID: {new_file["id"]}')
+
+        trades_data = TRADES_DATA_WS.get_all_values()
+        df = pd.DataFrame(trades_data[1:],columns=trades_data[0])
+        data = df[df['VALUE_DATE'] == value_date]
+        # print(data)
+        # print(type(data))
+        headings = df.columns.tolist()
+        list_of_data = df.values.tolist()
+
+        workbook = GSPREAD_CLIENT.open_by_key(new_file["id"])
+        data_sheet = workbook.add_worksheet(title="Data", rows=100, cols=20)
+        data_sheet.update_cell(1,1, f'Netting Report for Value Date {value_date}')
+        workbook.del_worksheet(workbook.sheet1)
+        data_sheet.append_row(headings)
+        data_sheet.append_rows(list_of_data)
+
+        breakdown_sheet = workbook.add_worksheet(title="Netting Breakdown", rows=100, cols=20)
+
+        breakdown_sheet.update_cell(1,1, f'Netting Report for Value Date {value_date}')
+
+        # Add code for the format of the netting report here
+        
+
+    except Exception as e:
+        print(f'Error creating new file: {e}')
+    
+    return new_file["id"]
+
+
 if __name__ == "__main__":
-    # main()
-    files = get_file_list("trade_data")
-    for file in files:
-        delete_file(file)
-    files = get_file_list()
+    main()
+    # # files = get_file_list("netting_report")
+    # files = get_file_list("trade_data")
+
+    # for file in files:
+    #     delete_file(file)
+    # files = get_file_list()
+    # print(get_most_recent_file())
+    # create_report_spreadsheet(get_most_recent_file())
+    # pass

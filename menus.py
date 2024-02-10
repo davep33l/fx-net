@@ -8,6 +8,7 @@ menu_2_choices = ["Yes", "Exit"]
 
 menu_3_question = "Please select an option"
 menu_3_choices = ["Create Netting report for most recent file (working)",
+                  "Create Netting report spreadsheet",
                    "Create payment files (WIP)",
                    "Show trade count by clients (WIP)",
                    "Show trade count by client and client trader (WIP)",
