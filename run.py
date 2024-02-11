@@ -33,144 +33,115 @@ def run():
     response = app_selector.run()
 
     if response == app_selector.choices[0]:
-
-        os.system("clear")
-        rprint("[green]Opening the Trading Simulator")
-        utils.please_wait()
-        rprint("[green]Trading App is open")
-        time.sleep(2)
-        os.system("clear")
-        ts_response = trading_simulator_menu.run()
-
-        if ts_response == trading_simulator_menu.choices[0]:
-
-            rprint("[green]Generating trade file...please wait")
-            data, file = trading_simulator.create_simulated_trade_data(int(random.uniform(50,150)))
-            file_id = trading_simulator.create_and_save_output_file(data, file) # NOTE1
-            rprint("[green]Data has been successfully generated and saved")
-            trading_simulator.update_system_date()
-            rprint("[green]System Date of the trading application has now been rolled")
-            time.sleep(1)
-            rprint("[cyan]You will now be automatically logged into FX Net")
-
-##########################################
-            while True:
-
-                fx_net_response = menus.menu(menus.menu_2_question, menus.menu_2_choices)
-                if fx_net_response == menus.menu_2_choices[0]:
-                    rprint("[green]Loading data to FX Net database...please wait")
-
-                    # NOTE1: temporary code to get file id is in the above code, will refactor into a date selection
-                    # so that the apps can run independantly and give options for user to select a date to load
-                    output_file = GSPREAD_CLIENT.open_by_key(file_id)
-                    data_to_move = output_file.sheet1.get_all_values()
-                    TRADES_DATA_WS.append_rows(data_to_move[1:])
-                    rprint("[green]Data has been successfully loaded into FX Net database")
-                    
-                elif fx_net_response == menus.menu_2_choices[1]:
-                    rprint("[green]Opening Reporting Menu")
-                    time.sleep(1)
-
-                    while True:
-                        rprint("\nWelcome to the analsyis menu\n")
-                        rep_response = menus.menu(menus.menu_3_question, menus.menu_3_choices)
-
-                        if rep_response == menus.menu_3_choices[0]:
-                            date = get_most_recent_file()
-                            create_table(date)
-                        elif rep_response == menus.menu_3_choices[1]:
-                            # create_report_spreadsheet("20240625")
-                            pass
-                        elif rep_response == menus.menu_3_choices[2]:
-                            pass
-                        elif rep_response == menus.menu_3_choices[3]:
-                            pass
-                        elif rep_response == menus.menu_3_choices[4]:
-                            pass
-                        elif rep_response == menus.menu_3_choices[5]:
-                            pass
-                        elif rep_response == menus.menu_3_choices[6]:
-                            rprint("[red]Exiting program")
-                            raise SystemExit
-                    
-                elif fx_net_response == menus.menu_2_choices[2]:
-                    rprint("[red]The program is now exiting")
-                    raise SystemExit
-
-#############################
-                     
-        elif ts_response == trading_simulator_menu.choices[1]:
-
-            rprint("[red]The program is now exiting")
-            utils.please_wait()
-            rprint("Goodbye!")
-            time.sleep(1)
-            os.system("clear")
-            raise SystemExit
-        
+        trading_sim_menu()
     elif response == app_selector.choices[1]:
+        fx_net_menu()
+    elif response == app_selector.choices[2]:
+        exit_message()
 
-        rprint("[green]Opening the FX Net Application")
-        utils.please_wait()
-        rprint("[green]FX Net is open") # call the FX Net app here
+    input("Press enter key to exit: ")
 
+def reporting_menu():
+    rprint("[green]Opening Reporting Menu")
+    time.sleep(1)
 
+    while True:
+        rprint("\nWelcome to the analsyis menu\n")
+        rep_response = menus.menu(menus.menu_3_question, menus.menu_3_choices)
+
+        if rep_response == menus.menu_3_choices[0]:
+            date = get_most_recent_file()
+            create_table(date)
+        elif rep_response == menus.menu_3_choices[1]:
+            # create_report_spreadsheet("20240625")
+            pass
+        elif rep_response == menus.menu_3_choices[2]:
+            pass
+        elif rep_response == menus.menu_3_choices[3]:
+            pass
+        elif rep_response == menus.menu_3_choices[4]:
+            pass
+        elif rep_response == menus.menu_3_choices[5]:
+            pass
+        elif rep_response == menus.menu_3_choices[6]:
+            exit_message()
+
+def fx_net_menu():
+    rprint("[green]Opening the FX Net Application")
+    utils.please_wait()
+    rprint("[green]FX Net is open") # call the FX Net app here
+
+    while True:
+
+        fx_net_response = menus.menu(menus.menu_2_question, menus.menu_2_choices)
+        if fx_net_response == menus.menu_2_choices[0]:
+            rprint("[green]Loading data to FX Net database...please wait")
+
+            # NOTE1: temporary code to get file id is in the above code, will refactor into a date selection
+            # so that the apps can run independantly and give options for user to select a date to load
+            output_file = GSPREAD_CLIENT.open_by_key(file_id)
+            data_to_move = output_file.sheet1.get_all_values()
+            TRADES_DATA_WS.append_rows(data_to_move[1:])
+            rprint("[green]Data has been successfully loaded into FX Net database")
+            
+        elif fx_net_response == menus.menu_2_choices[1]:
+            rprint("[green]Opening Reporting Menu")
+            time.sleep(1)
+            while True:
+                reporting_menu() 
+        elif fx_net_response == menus.menu_2_choices[2]:
+            exit_message()
+
+def exit_message():
+    rprint("[red]The program is now exiting")
+    utils.please_wait()
+    rprint("Goodbye!")
+    time.sleep(1)
+    os.system("clear")
+
+    raise SystemExit
+
+def trading_sim_menu():
+    os.system("clear")
+    rprint("[green]Opening the Trading Simulator")
+    utils.please_wait()
+    rprint("[green]Trading App is open")
+    time.sleep(2)
+    os.system("clear")
+    ts_response = trading_simulator_menu.run()
+
+    if ts_response == trading_simulator_menu.choices[0]:
+
+        rprint("[green]Generating trade file...please wait")
+        data, file = trading_simulator.create_simulated_trade_data(int(random.uniform(50,150)))
+        global file_id
+        file_id = trading_simulator.create_and_save_output_file(data, file) # NOTE1
+        rprint("[green]Data has been successfully generated and saved")
+        trading_simulator.update_system_date()
+        rprint("[green]System Date of the trading application has now been rolled")
+        time.sleep(1)
+        rprint("[cyan]You will now be automatically logged into FX Net")
 
         while True:
-
             fx_net_response = menus.menu(menus.menu_2_question, menus.menu_2_choices)
             if fx_net_response == menus.menu_2_choices[0]:
                 rprint("[green]Loading data to FX Net database...please wait")
-
                 # NOTE1: temporary code to get file id is in the above code, will refactor into a date selection
                 # so that the apps can run independantly and give options for user to select a date to load
                 output_file = GSPREAD_CLIENT.open_by_key(file_id)
                 data_to_move = output_file.sheet1.get_all_values()
                 TRADES_DATA_WS.append_rows(data_to_move[1:])
                 rprint("[green]Data has been successfully loaded into FX Net database")
-                
+            
             elif fx_net_response == menus.menu_2_choices[1]:
-                rprint("[green]Opening Reporting Menu")
-                time.sleep(1)
-
                 while True:
-                    rprint("\nWelcome to the analsyis menu\n")
-                    rep_response = menus.menu(menus.menu_3_question, menus.menu_3_choices)
-
-                    if rep_response == menus.menu_3_choices[0]:
-                        date = get_most_recent_file()
-                        create_table(date)
-                    elif rep_response == menus.menu_3_choices[1]:
-                        # create_report_spreadsheet("20240625")
-                        pass
-                    elif rep_response == menus.menu_3_choices[2]:
-                        pass
-                    elif rep_response == menus.menu_3_choices[3]:
-                        pass
-                    elif rep_response == menus.menu_3_choices[4]:
-                        pass
-                    elif rep_response == menus.menu_3_choices[5]:
-                        pass
-                    elif rep_response == menus.menu_3_choices[6]:
-                        rprint("[red]Exiting program")
-                        raise SystemExit
-                
+                    reporting_menu()
             elif fx_net_response == menus.menu_2_choices[2]:
-                rprint("[red]The program is now exiting")
-                raise SystemExit
+                exit_message()
+                    
+    elif ts_response == trading_simulator_menu.choices[1]:
+        exit_message()
 
-
-    elif response == app_selector.choices[2]:
-
-        rprint("[red]The program is now exiting")
-        utils.please_wait()
-        rprint("Goodbye!")
-        time.sleep(1)
-        os.system("clear")
-
-        raise SystemExit
-
-    input("Press enter key to exit: ")
 
 # move to either utils or to fx_net folder
 def delete_file(file_id):
