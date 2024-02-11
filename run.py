@@ -109,13 +109,6 @@ def fx_net_menu():
             break
 
 
-        # Get list of trade files
-        # Check if file already loaded
-        #
-        #
-        #
-        #
-
 def get_trade_data_files_list():
     '''
     This functions retrieves a list of trade data files from the database.
@@ -144,7 +137,6 @@ def get_trade_data_files_list():
                 trade_files.append((file['name'], file['id']))
 
     return trade_files
-
 
 def get_files_already_loaded():
     '''
@@ -184,23 +176,49 @@ def get_eligible_files_to_load():
 
     return eligible_files
 
-def update_files_loaded_ws():
-
-    pass
-
-
 
 def load_fx_data():
-    rprint("[green]Loading data to FX Net database...please wait")
+    '''
+    This function first checks if the available files in the shared folder
+    have already been loaded and returns a list of files that have not
+    been loaded into FX Net yet. 
+    It gives the user a prompt to select the file they wish to load, if there 
+    are no files available to load it informs the user and returns to the
+    menu. 
+    Once the file is loaded, the file name, trade date and file id are
+    added to the FILES_LOADED table, so it can be checked next time the
+    function is run. 
 
-    # NOTE1: temporary code to get file id is in the above code, 
-    # will refactor into a date selection
-    # so that the apps can run independantly and give options for 
-    #user to select a date to load
-    output_file = GSPREAD_CLIENT.open_by_key(file_id)
-    data_to_move = output_file.sheet1.get_all_values()
-    TRADES_DATA_WS.append_rows(data_to_move[1:])
-    rprint("[green]Data has been successfully loaded into FX Net database")
+    '''
+
+    file_data = get_eligible_files_to_load()
+    file_names = [file_name[0] for file_name in file_data]
+
+    if not file_names:
+        rprint("[red]No more data to load")
+        rprint("[red]Please choose another option")
+        time.sleep(2)
+    else:
+        choice = menus.menu("Pick a file to load", file_names)
+        print(choice)
+
+        for file in file_data:
+            if file[0] == choice:
+                chosen_file_id = file[1]
+
+        rprint("[green]Loading data to FX Net database...please wait")
+        
+        # NOTE1: temporary code to get file id is in the above code, 
+        # will refactor into a date selection
+        # so that the apps can run independantly and give options for 
+        #user to select a date to load
+        output_file = GSPREAD_CLIENT.open_by_key(chosen_file_id)
+        data_to_move = output_file.sheet1.get_all_values()
+        TRADES_DATA_WS.append_rows(data_to_move[1:])
+        rprint("[green]Data has been successfully loaded into FX Net database")
+
+        file_trade_date = choice[-8:]
+        FILES_LOADED_WS.append_row([choice, file_trade_date, chosen_file_id])
 
 def exit_message():
     '''
@@ -224,43 +242,36 @@ def trading_sim_menu():
     rprint("[green]Trading App is open")
     time.sleep(2)
     os.system("clear")
-    ts_response = trading_simulator_menu.run()
 
-    if ts_response == trading_simulator_menu.choices[0]:
+    while True:
+        ts_response = trading_simulator_menu.run()
+        if ts_response == trading_simulator_menu.choices[0]:
 
-        rprint("[green]Generating trade file...please wait")
-        data, file = trading_simulator.create_simulated_trade_data(int(random.uniform(50,150)))
-        global file_id
-        file_id = trading_simulator.create_and_save_output_file(data, file) # NOTE1
-        rprint("[green]Data has been successfully generated and saved")
-        trading_simulator.update_system_date()
-        rprint("[green]System Date of the trading application has now been rolled")
-        time.sleep(1)
-        rprint("[cyan]You will now be automatically logged into FX Net")
+            rprint("[green]Generating trade file...please wait")
+            data, file = trading_simulator.create_simulated_trade_data(int(random.uniform(50,150)))
+            global file_id
+            file_id = trading_simulator.create_and_save_output_file(data, file) # NOTE1
+            rprint("[green]Data has been successfully generated and saved")
+            trading_simulator.update_system_date()
+            rprint("[green]System Date of the trading application has now been rolled")
+            time.sleep(1)
 
-        while True:
-            fx_net_response = menus.menu(menus.menu_2_question, menus.menu_2_choices)
-            if fx_net_response == menus.menu_2_choices[0]:
-                rprint("[green]Loading data to FX Net database...please wait")
-                # NOTE1: temporary code to get file id is in the above code, 
-                # will refactor into a date selection
-                # so that the apps can run independantly and give options 
-                # for user to select a date to load
 
-                print(get_file_list())
+            # rprint("[cyan]You will now be automatically logged into FX Net")
 
-                output_file = GSPREAD_CLIENT.open_by_key(file_id)
-                data_to_move = output_file.sheet1.get_all_values()
-                TRADES_DATA_WS.append_rows(data_to_move[1:])
-                rprint("[green]Data has been successfully loaded into FX Net database")
-            elif fx_net_response == menus.menu_2_choices[1]:
-                reporting_menu()
-            elif fx_net_response == menus.menu_2_choices[2]:
-                break
-    elif ts_response == trading_simulator_menu.choices[1]:
-        print("Returning to main menu")
-        time.sleep(1)
-        os.system("clear")
+            # while True:
+            #     fx_net_response = menus.menu(menus.menu_2_question, menus.menu_2_choices)
+            #     if fx_net_response == menus.menu_2_choices[0]:
+            #         load_fx_data()
+            #     elif fx_net_response == menus.menu_2_choices[1]:
+            #         reporting_menu()
+            #     elif fx_net_response == menus.menu_2_choices[2]:
+            #         break
+        elif ts_response == trading_simulator_menu.choices[1]:
+            print("Returning to main menu")
+            time.sleep(1)
+            os.system("clear")
+            break
 
 
 # move to either utils or to fx_net folder
@@ -413,11 +424,8 @@ def create_report_spreadsheet(value_date):
 
     return new_file["id"]
 
-
-
-
 if __name__ == "__main__":
-    # run()
+    run()
 
     # INTERIM HELPERS TO DELETE FILES FROM GDRIVE DURING DEVELOPMENT
     # # files = get_file_list("netting_report")
@@ -434,4 +442,15 @@ if __name__ == "__main__":
     # print(trade_files)
 
     # get_files_already_loaded()
-    get_eligible_files_to_load()
+    # file_data = get_eligible_files_to_load()
+    # file_names = [file_name[0] for file_name in file_data]
+    
+    # choice = menus.menu("Pick a file to load", file_names)
+    # print(choice)
+
+    # for file in file_data:
+    #     if file[0] == choice:
+    #         file_id = file[1]
+
+
+    # print(file_id)
