@@ -27,6 +27,7 @@ DATABASE_WORKBOOK_TA = GSPREAD_CLIENT.open('trading_simulator_db')
 
 # Worksheet connections
 TRADES_DATA_WS = DATABASE_WORKBOOK.worksheet("TRADES")
+FILES_LOADED_WS = DATABASE_WORKBOOK.worksheet("FILES_LOADED")
 SYSTEM_INFO_WS = DATABASE_WORKBOOK_TA.worksheet("SYSTEM_INFO")
 
 # Variable connections from worksheets
@@ -106,6 +107,88 @@ def fx_net_menu():
             time.sleep(1)
             os.system("clear")
             break
+
+
+        # Get list of trade files
+        # Check if file already loaded
+        #
+        #
+        #
+        #
+
+def get_trade_data_files_list():
+    '''
+    This functions retrieves a list of trade data files from the database.
+
+    Returns: 
+        List of tuples containing file_name and file_id if files present.
+        If no files present, returns empty list.
+
+    Example:
+        trade_files = [(file_name1, file_id1), (file_name2, file_id2)].
+    '''
+    trade_files = []
+
+    file_name_filter = "trade_data"
+
+    g_drive_file_request = GDRIVE_CLIENT.files().list().execute()
+    all_files = g_drive_file_request.get('files', [])
+
+    if not all_files:
+        return trade_files
+    else:
+        for file in all_files:
+            if file_name_filter == None:
+                trade_files.append((file['name'], file['id']))
+            elif file["name"].startswith(file_name_filter):
+                trade_files.append((file['name'], file['id']))
+
+    return trade_files
+
+
+def get_files_already_loaded():
+    '''
+    This function checks the fx_net_db table of FILES_LOADED
+    and returns a list of file ids that have already been
+    used/loaded by the FX Net Application.
+
+    Returns: List of file_ids in FILES_LOADED table
+    '''
+    
+    files_loaded = FILES_LOADED_WS.get_all_values()
+    df = pd.DataFrame(files_loaded[1:],columns=files_loaded[0])
+    file_ids_loaded = df['FILE_ID'].tolist()
+
+    return file_ids_loaded
+
+def get_eligible_files_to_load():
+    '''
+    This function gets a list of already loaded file id's
+    and compares it against a list (of tuples) of files available
+    to load and creates a list of files that haven't yet 
+    been loaded into FX Net.
+
+    Returns: List of eligible files to load
+    '''
+
+    files_already_loaded = get_files_already_loaded()
+    files_to_load = get_trade_data_files_list()
+    # print(files_already_loaded)
+    # print(files_to_load)
+
+    eligible_files = []
+    for file in files_to_load:
+        if file[1] not in files_already_loaded:
+            eligible_files.append(file)
+    # print(eligible_files)
+
+    return eligible_files
+
+def update_files_loaded_ws():
+
+    pass
+
+
 
 def load_fx_data():
     rprint("[green]Loading data to FX Net database...please wait")
@@ -330,8 +413,11 @@ def create_report_spreadsheet(value_date):
 
     return new_file["id"]
 
+
+
+
 if __name__ == "__main__":
-    run()
+    # run()
 
     # INTERIM HELPERS TO DELETE FILES FROM GDRIVE DURING DEVELOPMENT
     # # files = get_file_list("netting_report")
@@ -343,3 +429,9 @@ if __name__ == "__main__":
     # print(get_most_recent_file())
     # create_report_spreadsheet(get_most_recent_file())
     # pass
+
+    # trade_files = get_trade_data_files_list()
+    # print(trade_files)
+
+    # get_files_already_loaded()
+    get_eligible_files_to_load()
