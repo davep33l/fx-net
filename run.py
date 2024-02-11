@@ -1,8 +1,11 @@
+''''
+TBD
+'''
 # Build in imports
 import os
 import time
 import random
-from datetime import timedelta, datetime
+# from datetime import timedelta, datetime
 
 # Third party library imports
 from rich.console import Console
@@ -19,17 +22,20 @@ from _utils import utils
 
 
 GSPREAD_CLIENT, GDRIVE_CLIENT = get_google_clients()
-DATABASE_WORKBOOK = GSPREAD_CLIENT.open('fx-net-data')
+DATABASE_WORKBOOK = GSPREAD_CLIENT.open('fx_net_db')
+DATABASE_WORKBOOK_TA = GSPREAD_CLIENT.open('trading_simulator_db')
 
 # Worksheet connections
 TRADES_DATA_WS = DATABASE_WORKBOOK.worksheet("TRADES")
-SYSTEM_INFO_WS = DATABASE_WORKBOOK.worksheet("SYSTEM_INFO")
+SYSTEM_INFO_WS = DATABASE_WORKBOOK_TA.worksheet("SYSTEM_INFO")
 
 # Variable connections from worksheets
 trading_app_sys_date = SYSTEM_INFO_WS.range("A2")[0].value
 
 def run():
-
+    '''
+    TBD
+    '''
     os.system("clear")
 
 
@@ -37,16 +43,18 @@ def run():
         response = app_selector.run()
         if response == app_selector.choices[0]:
             trading_sim_menu()
-            
         elif response == app_selector.choices[1]:
             fx_net_menu()
-            
         elif response == app_selector.choices[2]:
             exit_message()
 
     # input("Press enter key to exit: ")
 
 def reporting_menu():
+    '''
+    TBD
+    '''
+
     rprint("[green]Opening Reporting Menu")
     time.sleep(1)
     os.system("clear")
@@ -76,6 +84,10 @@ def reporting_menu():
             return
 
 def fx_net_menu():
+    '''
+    TBD
+    '''
+
     rprint("[green]Opening the FX Net Application")
     utils.please_wait()
     os.system("clear")
@@ -85,15 +97,7 @@ def fx_net_menu():
 
         fx_net_response = menus.menu(menus.menu_2_question, menus.menu_2_choices)
         if fx_net_response == menus.menu_2_choices[0]:
-            rprint("[green]Loading data to FX Net database...please wait")
-
-            # NOTE1: temporary code to get file id is in the above code, will refactor into a date selection
-            # so that the apps can run independantly and give options for user to select a date to load
-            output_file = GSPREAD_CLIENT.open_by_key(file_id)
-            data_to_move = output_file.sheet1.get_all_values()
-            TRADES_DATA_WS.append_rows(data_to_move[1:])
-            rprint("[green]Data has been successfully loaded into FX Net database")
-            
+            load_fx_data()
         elif fx_net_response == menus.menu_2_choices[1]:
             reporting_menu()
             break
@@ -103,7 +107,22 @@ def fx_net_menu():
             os.system("clear")
             break
 
+def load_fx_data():
+    rprint("[green]Loading data to FX Net database...please wait")
+
+    # NOTE1: temporary code to get file id is in the above code, 
+    # will refactor into a date selection
+    # so that the apps can run independantly and give options for 
+    #user to select a date to load
+    output_file = GSPREAD_CLIENT.open_by_key(file_id)
+    data_to_move = output_file.sheet1.get_all_values()
+    TRADES_DATA_WS.append_rows(data_to_move[1:])
+    rprint("[green]Data has been successfully loaded into FX Net database")
+
 def exit_message():
+    '''
+    TBD
+    '''
     rprint("[red]The program is now exiting")
     utils.please_wait()
     rprint("Goodbye!")
@@ -113,6 +132,9 @@ def exit_message():
     raise SystemExit
 
 def trading_sim_menu():
+    '''
+    TBD
+    '''
     os.system("clear")
     rprint("[green]Opening the Trading Simulator")
     utils.please_wait()
@@ -137,20 +159,22 @@ def trading_sim_menu():
             fx_net_response = menus.menu(menus.menu_2_question, menus.menu_2_choices)
             if fx_net_response == menus.menu_2_choices[0]:
                 rprint("[green]Loading data to FX Net database...please wait")
-                # NOTE1: temporary code to get file id is in the above code, will refactor into a date selection
-                # so that the apps can run independantly and give options for user to select a date to load
+                # NOTE1: temporary code to get file id is in the above code, 
+                # will refactor into a date selection
+                # so that the apps can run independantly and give options 
+                # for user to select a date to load
+
+                print(get_file_list())
+
                 output_file = GSPREAD_CLIENT.open_by_key(file_id)
                 data_to_move = output_file.sheet1.get_all_values()
                 TRADES_DATA_WS.append_rows(data_to_move[1:])
                 rprint("[green]Data has been successfully loaded into FX Net database")
-            
             elif fx_net_response == menus.menu_2_choices[1]:
                 reporting_menu()
             elif fx_net_response == menus.menu_2_choices[2]:
                 break
-                    
     elif ts_response == trading_simulator_menu.choices[1]:
-        
         print("Returning to main menu")
         time.sleep(1)
         os.system("clear")
@@ -158,7 +182,9 @@ def trading_sim_menu():
 
 # move to either utils or to fx_net folder
 def delete_file(file_id):
-
+    '''
+    TBD
+    '''
     try:
         GDRIVE_CLIENT.files().delete(fileId=file_id).execute()
         print(f'File with ID {file_id} successfully deleted.')
@@ -168,7 +194,9 @@ def delete_file(file_id):
 
 # move to either utils or to fx_net folder
 def get_file_list(file_name_filter=None):
-
+    '''
+    TBD
+    '''
     list_of_files = []
     if file_name_filter == None:
         notification = "with no filter"
@@ -196,6 +224,9 @@ def get_file_list(file_name_filter=None):
 
 # move to fx_net folder
 def create_table(date):
+    '''
+    TBD
+    '''
     os.system("clear")
     trades_data = TRADES_DATA_WS.get_all_values()
     df = pd.DataFrame(trades_data[1:],columns=trades_data[0])
@@ -242,6 +273,9 @@ def create_table(date):
 
 # move to fx_net folder
 def get_most_recent_file():
+    '''
+    TBD
+    '''
     trades_data = TRADES_DATA_WS.get_all_values()
     df = pd.DataFrame(trades_data[1:],columns=trades_data[0])
     unique_value_dates = df['VALUE_DATE'].unique()
@@ -291,14 +325,10 @@ def create_report_spreadsheet(value_date):
         breakdown_sheet.update_cell(1,1, f'Netting Report for Value Date {value_date}')
 
         # Add code for the format of the netting report here
-        
-
     except Exception as e:
         print(f'Error creating new file: {e}')
-    
+
     return new_file["id"]
-
-
 
 if __name__ == "__main__":
     run()
