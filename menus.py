@@ -3,8 +3,8 @@ from InquirerPy import inquirer
 menu_1_question = "Do you want to proceed with creating the simulated data?"
 menu_1_choices = ["Yes", "Exit program"]
 
-menu_2_question = "Do you want to load the data into FX Net program?"
-menu_2_choices = ["Yes", "Exit"]
+menu_2_question = "Please choose an option?"
+menu_2_choices = ["Load Data", "Reporting Menu", "Exit"]
 
 menu_3_question = "Please select an option"
 menu_3_choices = ["Create Netting report for most recent file (working)",

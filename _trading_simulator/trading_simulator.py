@@ -53,7 +53,7 @@ HEADINGS = ["CLIENT_NAME", "CLIENT_TRADER", "BANK_TRADER", "TRADE_ID",
             "TRADE_DATE", "VALUE_DATE","CHANNEL"]
     
 
-def create_simulated_trade_data(trade_date, quantity_of_trades):
+def create_simulated_trade_data(quantity_of_trades):
 
     """
     Purpose: This function takes in two arguments in order to produce a data
@@ -68,6 +68,14 @@ def create_simulated_trade_data(trade_date, quantity_of_trades):
     Returns: A list which contains a list of trade data (including headers)
     and the file name.
     """
+
+    google_clients = database_manager.get_google_clients()
+    GSPREAD_CLIENT = google_clients[0]
+    DATABASE_WORKBOOK = GSPREAD_CLIENT.open('trading_simulator_db')
+    SYSTEM_INFO_WS = DATABASE_WORKBOOK.worksheet("SYSTEM_INFO")
+
+    # Variable connections from worksheets
+    trade_date = SYSTEM_INFO_WS.range("A2")[0].value
 
     # Error checking
     try:
