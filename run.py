@@ -52,7 +52,7 @@ def main():
             file_id = trading_simulator.create_and_save_output_file(data, file, get_google_clients())
 
             rprint("[green]Data has been successfully generated and saved")
-            update_system_date()
+            trading_simulator.update_system_date()
             rprint("[green]System Date of the trading application has now been rolled")
             break
         elif response == menus.menu_1_choices[1]:
@@ -139,17 +139,6 @@ def get_file_list(file_name_filter=None):
 
     return list_of_files
 
-# move this to trading simulator
-def update_system_date():
-    trading_app_sys_date_ISO_format = datetime.strptime(trading_app_sys_date, "%Y%m%d")
-
-    new_trading_app_sys_date = trading_app_sys_date_ISO_format + timedelta(1)
-
-    while new_trading_app_sys_date.weekday() >= 5:
-        new_trading_app_sys_date += timedelta(days=1)
-
-    sys_date_string = new_trading_app_sys_date.strftime("%Y%m%d")
-    SYSTEM_INFO_WS.update_acell('A2', sys_date_string)
 
 # move to fx_net folder
 def create_table(date):
@@ -271,9 +260,9 @@ def run():
         if ts_response == trading_simulator_menu.choices[0]:
             rprint("[green]Generating trade file...please wait")
             data, file = trading_simulator.create_simulated_trade_data(trading_app_sys_date, int(random.uniform(50,150)))
-            trading_simulator.create_and_save_output_file(data, file, get_google_clients())
+            trading_simulator.create_and_save_output_file(data, file)
             rprint("[green]Data has been successfully generated and saved")
-            update_system_date()
+            trading_simulator.update_system_date()
             rprint("[green]System Date of the trading application has now been rolled")
         elif ts_response == trading_simulator_menu.choices[1]:
             rprint("[red]The program is now exiting")

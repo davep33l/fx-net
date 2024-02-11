@@ -1,5 +1,6 @@
 import random
 from datetime import timedelta, datetime
+from . import database_manager
 
 CLIENTS = {
     'Capital Trading': ['Max Scott', 'Ava Lee'],
@@ -152,7 +153,7 @@ def create_simulated_trade_data(trade_date, quantity_of_trades):
 
     return full_data, file_name
 
-def create_and_save_output_file(data, file_name, google_clients, email="davidpeel.test1@gmail.com"):
+def create_and_save_output_file(data, file_name, email="davidpeel.test1@gmail.com"):
     """
     Using the Trading data, it creates a file and saves to google
     drive as a sheet and returns the file id.
@@ -168,6 +169,7 @@ def create_and_save_output_file(data, file_name, google_clients, email="davidpee
     Returns: File Id when successfully saved to google drive
     """
 
+    google_clients = database_manager.get_google_clients()
     GSPREAD_CLIENT = google_clients[0]
     GDRIVE_CLIENT = google_clients[1]
 
@@ -198,6 +200,27 @@ def create_and_save_output_file(data, file_name, google_clients, email="davidpee
     
     return new_file["id"]
 
+# move this to trading simulator
+def update_system_date():
+
+    
+    google_clients = database_manager.get_google_clients()
+    GSPREAD_CLIENT = google_clients[0]
+    DATABASE_WORKBOOK = GSPREAD_CLIENT.open('trading_simulator_db')
+    SYSTEM_INFO_WS = DATABASE_WORKBOOK.worksheet("SYSTEM_INFO")
+
+    # Variable connections from worksheets
+    trading_app_sys_date = SYSTEM_INFO_WS.range("A2")[0].value
+
+    trading_app_sys_date_ISO_format = datetime.strptime(trading_app_sys_date, "%Y%m%d")
+
+    new_trading_app_sys_date = trading_app_sys_date_ISO_format + timedelta(1)
+
+    while new_trading_app_sys_date.weekday() >= 5:
+        new_trading_app_sys_date += timedelta(days=1)
+
+    sys_date_string = new_trading_app_sys_date.strftime("%Y%m%d")
+    SYSTEM_INFO_WS.update_acell('A2', sys_date_string)
 
 
 
