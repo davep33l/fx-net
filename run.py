@@ -65,8 +65,7 @@ def reporting_menu():
         rep_response = menus.menu(menus.menu_3_question, menus.menu_3_choices)
 
         if rep_response == menus.menu_3_choices[0]:
-            date = get_most_recent_file()
-            create_table(date)
+            create_table()
         elif rep_response == menus.menu_3_choices[1]:
             # create_report_spreadsheet("20240625")
             pass
@@ -107,7 +106,6 @@ def fx_net_menu():
             time.sleep(1)
             os.system("clear")
             break
-
 
 def get_trade_data_files_list():
     '''
@@ -175,7 +173,6 @@ def get_eligible_files_to_load():
     # print(eligible_files)
 
     return eligible_files
-
 
 def load_fx_data():
     '''
@@ -273,7 +270,6 @@ def trading_sim_menu():
             os.system("clear")
             break
 
-
 # move to either utils or to fx_net folder
 def delete_file(file_id):
     '''
@@ -315,55 +311,64 @@ def get_file_list(file_name_filter=None):
 
     return list_of_files
 
-
 # move to fx_net folder
-def create_table(date):
+def create_table():
     '''
     TBD
     '''
-    os.system("clear")
-    trades_data = TRADES_DATA_WS.get_all_values()
-    df = pd.DataFrame(trades_data[1:],columns=trades_data[0])
-    df = df[df["VALUE_DATE"] == date]
+    dates = get_available_report_value_dates()
 
-    trade_table = Table(title=f"\n\nFX Netting Data for {date}")
+    if len(dates) == 0:
+        rprint("[red]No data stored in FX Net Database")
+        rprint("[red]Please load data or select another option")
+        time.sleep(2)
+    else:
+        date = menus.menu("Pick a file to load", dates)
 
-    trade_table.add_column("Client", justify="center", style="green", no_wrap=True)
-    trade_table.add_column("CCY", justify="center", style="cyan")
-    # trade_table.add_column("Net Buy", justify="center", style="green")
-    # trade_table.add_column("Net Sell", justify="center", style="red")
-    trade_table.add_column("Overall Net", justify="center", style="white")
-    trade_table.add_column("Actions", justify="center", style="white")
 
-    df['BUY_AMT'] = pd.to_numeric(df['BUY_AMT'], errors='coerce')
-    df['SELL_AMT'] = pd.to_numeric(df['SELL_AMT'], errors='coerce')
 
-    unique_clients = df['CLIENT_NAME'].unique()
-    unique_buy_ccys = list(df["BUY_CCY"].unique())
-    unique_sell_ccys = list(df['SELL_CCY'].unique())
-    unique_all_ccys = sorted(set(unique_buy_ccys + unique_sell_ccys))
+        os.system("clear")
+        trades_data = TRADES_DATA_WS.get_all_values()
+        df = pd.DataFrame(trades_data[1:],columns=trades_data[0])
+        df = df[df["VALUE_DATE"] == date]
 
-    for client in unique_clients:
-        for ccy in unique_all_ccys:
-            buy_col = df.query('CLIENT_NAME == @client and BUY_CCY == @ccy')
-            sell_col = df.query('CLIENT_NAME == @client and SELL_CCY == @ccy')
-            buy_sum = round(buy_col['BUY_AMT'].sum(),2)
-            sell_sum = round(sell_col['SELL_AMT'].sum(),2)
-            net = round(buy_sum + sell_sum,2)
+        trade_table = Table(title=f"\n\nFX Netting Data for {date}")
 
-            if net < 0:
-                action = f"pay {ccy}"
-            else:
-                action = f"receive {ccy}"
+        trade_table.add_column("Client", justify="center", style="green", no_wrap=True)
+        trade_table.add_column("CCY", justify="center", style="cyan")
+        trade_table.add_column("Overall Net", justify="center", style="white")
+        trade_table.add_column("Actions", justify="center", style="white")
 
-            # trade_table.add_row(client, ccy, "{:,.2f}".format(buy_sum), "{:,.2f}".format(sell_sum), "{:,.2f}".format(net), action)
-            trade_table.add_row(client, ccy, "{:,.2f}".format(net), action)
+        df['BUY_AMT'] = pd.to_numeric(df['BUY_AMT'], errors='coerce')
+        df['SELL_AMT'] = pd.to_numeric(df['SELL_AMT'], errors='coerce')
 
-    
-    console = Console()
-    console.print(trade_table)
+        unique_clients = df['CLIENT_NAME'].unique()
+        unique_buy_ccys = list(df["BUY_CCY"].unique())
+        unique_sell_ccys = list(df['SELL_CCY'].unique())
+        unique_all_ccys = sorted(set(unique_buy_ccys + unique_sell_ccys))
 
-    input("Press Enter to continue")
+        for client in unique_clients:
+            for ccy in unique_all_ccys:
+                buy_col = df.query('CLIENT_NAME == @client and BUY_CCY == @ccy')
+                sell_col = df.query('CLIENT_NAME == @client and SELL_CCY == @ccy')
+                buy_sum = round(buy_col['BUY_AMT'].sum(),2)
+                sell_sum = round(sell_col['SELL_AMT'].sum(),2)
+                net = round(buy_sum + sell_sum,2)
+
+                if net < 0:
+                    action = f"pay {ccy}"
+                else:
+                    action = f"receive {ccy}"
+
+                # trade_table.add_row(client, ccy, "{:,.2f}".format(buy_sum), "{:,.2f}".format(sell_sum), "{:,.2f}".format(net), action)
+                trade_table.add_row(client, ccy, "{:,.2f}".format(net), action)
+
+        
+        console = Console()
+        console.print(trade_table)
+
+        rprint("[cyan]Scroll to see full table if required")
+        input("Press Enter to continue")
 
 # move to fx_net folder
 def get_most_recent_file():
@@ -424,6 +429,18 @@ def create_report_spreadsheet(value_date):
 
     return new_file["id"]
 
+def get_available_report_value_dates():
+
+    all_data = TRADES_DATA_WS.get_all_values()
+    df = pd.DataFrame(all_data[1:],columns=all_data[0])
+
+    
+    value_dates = df['VALUE_DATE'].unique()
+    if len(value_dates) > 0:
+        return value_dates
+    else:
+        return []
+
 if __name__ == "__main__":
     run()
 
@@ -454,3 +471,6 @@ if __name__ == "__main__":
 
 
     # print(file_id)
+
+    # result = get_available_report_value_dates()
+    # print(result)

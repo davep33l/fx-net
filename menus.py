@@ -7,13 +7,13 @@ menu_2_question = "Please choose an option?"
 menu_2_choices = ["Load Data", "Reporting Menu", "Return to previous menu"]
 
 menu_3_question = "Please select an option"
-menu_3_choices = ["Create Netting report for most recent file (working)",
-                  "Create Netting report spreadsheet",
+menu_3_choices = ["Show Netting Summary by Value Date (working)",
+                  "Create Netting Report by Value Date (WIP)",
                    "Create payment files (WIP)",
                    "Show trade count by clients (WIP)",
                    "Show trade count by client and client trader (WIP)",
                    "Show trade count by bank trader (WIP)",
-                   "Return to previous menu (working)"]
+                   "Return to main menu (working)"]
 
 def menu(question, choices):
 
