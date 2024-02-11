@@ -100,6 +100,10 @@ Currency, Amount, Client Payment Instructions, Value Date
 6. Risk reduction by minimising any user intervention
 7. Time saving by automating manual processes
 
+## Flow Charts
+
+![Logic Flow Chart](/readme/images//logic-flow-chart.png)
+
 ## Trading Application Design / Architecture
 
 - Simple Menu system to ask if data needs to be generated
