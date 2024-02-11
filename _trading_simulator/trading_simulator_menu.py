@@ -1,7 +1,7 @@
 from InquirerPy import inquirer
 
 question = "Do you want to proceed with creating the simulated data?"
-choices = ["Yes", "Exit program"]
+choices = ["Yes", "No (previous menu)"]
 
 def run():
 

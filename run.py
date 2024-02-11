@@ -30,22 +30,28 @@ trading_app_sys_date = SYSTEM_INFO_WS.range("A2")[0].value
 
 def run():
 
-    response = app_selector.run()
+    os.system("clear")
 
-    if response == app_selector.choices[0]:
-        trading_sim_menu()
-    elif response == app_selector.choices[1]:
-        fx_net_menu()
-    elif response == app_selector.choices[2]:
-        exit_message()
 
-    input("Press enter key to exit: ")
+    while True:
+        response = app_selector.run()
+        if response == app_selector.choices[0]:
+            trading_sim_menu()
+            
+        elif response == app_selector.choices[1]:
+            fx_net_menu()
+            
+        elif response == app_selector.choices[2]:
+            exit_message()
+
+    # input("Press enter key to exit: ")
 
 def reporting_menu():
     rprint("[green]Opening Reporting Menu")
     time.sleep(1)
-
+    os.system("clear")
     while True:
+        os.system("clear")
         rprint("\nWelcome to the analsyis menu\n")
         rep_response = menus.menu(menus.menu_3_question, menus.menu_3_choices)
 
@@ -64,13 +70,17 @@ def reporting_menu():
         elif rep_response == menus.menu_3_choices[5]:
             pass
         elif rep_response == menus.menu_3_choices[6]:
-            exit_message()
+            print("Returning previous menu")
+            time.sleep(1)
+            os.system("clear")
+            return
 
 def fx_net_menu():
     rprint("[green]Opening the FX Net Application")
     utils.please_wait()
+    os.system("clear")
     rprint("[green]FX Net is open") # call the FX Net app here
-
+    time.sleep(1)
     while True:
 
         fx_net_response = menus.menu(menus.menu_2_question, menus.menu_2_choices)
@@ -85,12 +95,13 @@ def fx_net_menu():
             rprint("[green]Data has been successfully loaded into FX Net database")
             
         elif fx_net_response == menus.menu_2_choices[1]:
-            rprint("[green]Opening Reporting Menu")
-            time.sleep(1)
-            while True:
-                reporting_menu() 
+            reporting_menu()
+            break
         elif fx_net_response == menus.menu_2_choices[2]:
-            exit_message()
+            print("Returning previous menu")
+            time.sleep(1)
+            os.system("clear")
+            break
 
 def exit_message():
     rprint("[red]The program is now exiting")
@@ -134,13 +145,15 @@ def trading_sim_menu():
                 rprint("[green]Data has been successfully loaded into FX Net database")
             
             elif fx_net_response == menus.menu_2_choices[1]:
-                while True:
-                    reporting_menu()
+                reporting_menu()
             elif fx_net_response == menus.menu_2_choices[2]:
-                exit_message()
+                break
                     
     elif ts_response == trading_simulator_menu.choices[1]:
-        exit_message()
+        
+        print("Returning to main menu")
+        time.sleep(1)
+        os.system("clear")
 
 
 # move to either utils or to fx_net folder
@@ -183,6 +196,7 @@ def get_file_list(file_name_filter=None):
 
 # move to fx_net folder
 def create_table(date):
+    os.system("clear")
     trades_data = TRADES_DATA_WS.get_all_values()
     df = pd.DataFrame(trades_data[1:],columns=trades_data[0])
     df = df[df["VALUE_DATE"] == date]
@@ -223,6 +237,8 @@ def create_table(date):
     
     console = Console()
     console.print(trade_table)
+
+    input("Press Enter to continue")
 
 # move to fx_net folder
 def get_most_recent_file():
@@ -286,7 +302,8 @@ def create_report_spreadsheet(value_date):
 
 if __name__ == "__main__":
     run()
-    # main()
+
+    # INTERIM HELPERS TO DELETE FILES FROM GDRIVE DURING DEVELOPMENT
     # # files = get_file_list("netting_report")
     # files = get_file_list("trade_data")
 
