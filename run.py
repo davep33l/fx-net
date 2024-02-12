@@ -51,6 +51,7 @@ def run():
 
     # input("Press enter key to exit: ")
 
+# Move to fx_net folder
 def reporting_menu():
     '''
     TBD
@@ -83,6 +84,7 @@ def reporting_menu():
             os.system("clear")
             return
 
+# Move to fx_net folder
 def fx_net_menu():
     '''
     TBD
@@ -107,6 +109,7 @@ def fx_net_menu():
             os.system("clear")
             break
 
+# Move to fx_net folder
 def get_trade_data_files_list():
     '''
     This functions retrieves a list of trade data files from the database.
@@ -136,6 +139,7 @@ def get_trade_data_files_list():
 
     return trade_files
 
+# Move to fx_net folder
 def get_files_already_loaded():
     '''
     This function checks the fx_net_db table of FILES_LOADED
@@ -151,6 +155,7 @@ def get_files_already_loaded():
 
     return file_ids_loaded
 
+# Move to fx_net folder
 def get_eligible_files_to_load():
     '''
     This function gets a list of already loaded file id's
@@ -174,6 +179,7 @@ def get_eligible_files_to_load():
 
     return eligible_files
 
+# Move to fx_net folder
 def load_fx_data():
     '''
     This function first checks if the available files in the shared folder
@@ -217,6 +223,7 @@ def load_fx_data():
         file_trade_date = choice[-8:]
         FILES_LOADED_WS.append_row([choice, file_trade_date, chosen_file_id])
 
+# Move to utils folder
 def exit_message():
     '''
     TBD
@@ -229,6 +236,7 @@ def exit_message():
 
     raise SystemExit
 
+# Move to trading_simulator folder
 def trading_sim_menu():
     '''
     TBD
