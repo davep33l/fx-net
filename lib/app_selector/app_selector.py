@@ -19,10 +19,10 @@ def run():
     while True:
         os.system("clear")
 
-        app_simulator_question = {
+        app_selector_question = {
                 "Please select an option?": {
                 "Trading Simulator": trading_sim_menu,
                 "FX Net": fx_net_menu,
                 "Exit": exit_message,
                 }}
-        list_select_menu(app_simulator_question)
+        list_select_menu(app_selector_question)

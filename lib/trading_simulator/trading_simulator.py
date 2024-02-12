@@ -1,9 +1,13 @@
 import os
 import time
 import random
+from datetime import timedelta, datetime
+
+import random
 from rich import print as rprint
 
 from lib import utils
+from lib.app_selector import app_selector
 
 # Move to trading_simulator folder
 def trading_sim_menu():
@@ -18,103 +22,30 @@ def trading_sim_menu():
     os.system("clear")
 
     while True:
-        ts_response = run()
-        if ts_response == choices[0]:
+        trading_simulator_question = {
+            "Please select an option?": {
+            "Generate and save trades": generate_and_save_trades,
+            "Return to previous menu": return_to_previous_menu
+            }}
 
-            rprint("[green]Generating trade file...please wait")
-            data, file = create_simulated_trade_data(int(random.uniform(50,150)))
-            global file_id
-            file_id = create_and_save_output_file(data, file) # NOTE1
-            rprint("[green]Data has been successfully generated and saved")
-            update_system_date()
-            rprint("[green]System Date of the trading application has now been rolled")
-            time.sleep(1)
+        utils.list_select_menu(trading_simulator_question)
 
-
-            # rprint("[cyan]You will now be automatically logged into FX Net")
-
-            # while True:
-            #     fx_net_response = menus.menu(menus.menu_2_question, menus.menu_2_choices)
-            #     if fx_net_response == menus.menu_2_choices[0]:
-            #         load_fx_data()
-            #     elif fx_net_response == menus.menu_2_choices[1]:
-            #         reporting_menu()
-            #     elif fx_net_response == menus.menu_2_choices[2]:
-            #         break
-        elif ts_response == choices[1]:
-            print("Returning to main menu")
-            time.sleep(1)
-            os.system("clear")
-            break
-
-from InquirerPy import inquirer
-
-question = "Do you want to proceed with creating the simulated data?"
-choices = ["Yes", "No (previous menu)"]
-
-def run():
-
-    result = inquirer.select(
-    message=question,
-    choices=choices,
-    ).execute()
-
-    return result
-
-import random
-from datetime import timedelta, datetime
-
-
-CLIENTS = {
-    'Capital Trading': ['Max Scott', 'Ava Lee'],
-    'Nova Wealth': ['Leo Chen', 'Mia Hall'],
-    'Pulse Trading': ['Kai Wong', 'Lily Brooks'],
-    'Greystone': ['Mason Cole', 'Ayesha Kumar'],
-    'Comet FX': ['Ivy Li', 'Ethan Carter'],
-}
-
-CHANNELS = [
-    "Bloomberg", 
-    "Reuters", 
-    "FX Connect", 
-    "Phone"
-    ]
-
-TRADING_PAIRS = {
-    'USD/GBP': {'low': 0.78, 'high': 0.8},
-    'USD/JPY': {'low': 145, 'high': 149}, 
-    'USD/CAD': {'low': 1.33, 'high': 1.35}, 
-    'USD/EUR': {'low': 0.91, 'high': 0.93}, 
-    'GBP/USD': {'low': 1.25, 'high': 1.28}, 
-    'GBP/JPY': {'low': 186, 'high': 187}, 
-    'GBP/CAD': {'low': 1.7, 'high': 1.72}, 
-    'GBP/EUR': {'low': 1.16, 'high': 1.18}, 
-    'JPY/USD': {'low': 0.0065, 'high': 0.0068}, 
-    'JPY/GBP': {'low': 0.0053, 'high': 0.0056}, 
-    'JPY/CAD': {'low': 0.0088, 'high': 0.0092}, 
-    'JPY/EUR': {'low': 0.0061, 'high': 0.0064}, 
-    'CAD/USD': {'low': 0.72, 'high': 0.76}, 
-    'CAD/GBP': {'low': 0.57, 'high': 0.59}, 
-    'CAD/JPY': {'low': 109, 'high': 111}, 
-    'CAD/EUR': {'low': 0.73, 'high': 0.75}, 
-    'EUR/USD': {'low': 1.06, 'high': 1.1}, 
-    'EUR/GBP': {'low': 0.84, 'high': 0.86}, 
-    'EUR/JPY': {'low': 158, 'high': 162}, 
-    'EUR/CAD': {'low': 1.43, 'high': 1.47}
-    }
-
-BANK_TRADERS = [
-    "Raj Singh",
-    "Max Tan",
-    "Emma Davis",
-    "Mike Taylor",
-    "Emily Wilson"
-]
-
-HEADINGS = ["CLIENT_NAME", "CLIENT_TRADER", "BANK_TRADER", "TRADE_ID",
-            "CCY_PAIR","BUY_CCY","BUY_AMT","RATE","SELL_CCY","SELL_AMT",
-            "TRADE_DATE", "VALUE_DATE","CHANNEL"]
+def return_to_previous_menu():
+    print("Returning to main menu")
+    time.sleep(1)
+    os.system("clear")
+    app_selector.run()
+ 
+def generate_and_save_trades():
     
+    rprint("[green]Generating trade file...please wait")
+    data, file = create_simulated_trade_data(int(random.uniform(50,150)))
+    global file_id
+    file_id = create_and_save_output_file(data, file) # NOTE1
+    rprint("[green]Data has been successfully generated and saved")
+    update_system_date()
+    rprint("[green]System Date of the trading application has now been rolled")
+    time.sleep(1)
 
 def create_simulated_trade_data(quantity_of_trades):
 
@@ -132,7 +63,59 @@ def create_simulated_trade_data(quantity_of_trades):
     and the file name.
     """
 
-    google_clients = get_google_clients()
+    
+    CLIENTS = {
+        'Capital Trading': ['Max Scott', 'Ava Lee'],
+        'Nova Wealth': ['Leo Chen', 'Mia Hall'],
+        'Pulse Trading': ['Kai Wong', 'Lily Brooks'],
+        'Greystone': ['Mason Cole', 'Ayesha Kumar'],
+        'Comet FX': ['Ivy Li', 'Ethan Carter'],
+    }
+
+    CHANNELS = [
+        "Bloomberg", 
+        "Reuters", 
+        "FX Connect", 
+        "Phone"
+        ]
+
+    TRADING_PAIRS = {
+        'USD/GBP': {'low': 0.78, 'high': 0.8},
+        'USD/JPY': {'low': 145, 'high': 149}, 
+        'USD/CAD': {'low': 1.33, 'high': 1.35}, 
+        'USD/EUR': {'low': 0.91, 'high': 0.93}, 
+        'GBP/USD': {'low': 1.25, 'high': 1.28}, 
+        'GBP/JPY': {'low': 186, 'high': 187}, 
+        'GBP/CAD': {'low': 1.7, 'high': 1.72}, 
+        'GBP/EUR': {'low': 1.16, 'high': 1.18}, 
+        'JPY/USD': {'low': 0.0065, 'high': 0.0068}, 
+        'JPY/GBP': {'low': 0.0053, 'high': 0.0056}, 
+        'JPY/CAD': {'low': 0.0088, 'high': 0.0092}, 
+        'JPY/EUR': {'low': 0.0061, 'high': 0.0064}, 
+        'CAD/USD': {'low': 0.72, 'high': 0.76}, 
+        'CAD/GBP': {'low': 0.57, 'high': 0.59}, 
+        'CAD/JPY': {'low': 109, 'high': 111}, 
+        'CAD/EUR': {'low': 0.73, 'high': 0.75}, 
+        'EUR/USD': {'low': 1.06, 'high': 1.1}, 
+        'EUR/GBP': {'low': 0.84, 'high': 0.86}, 
+        'EUR/JPY': {'low': 158, 'high': 162}, 
+        'EUR/CAD': {'low': 1.43, 'high': 1.47}
+        }
+
+    BANK_TRADERS = [
+        "Raj Singh",
+        "Max Tan",
+        "Emma Davis",
+        "Mike Taylor",
+        "Emily Wilson"
+    ]
+
+    HEADINGS = ["CLIENT_NAME", "CLIENT_TRADER", "BANK_TRADER", "TRADE_ID",
+                "CCY_PAIR","BUY_CCY","BUY_AMT","RATE","SELL_CCY","SELL_AMT",
+                "TRADE_DATE", "VALUE_DATE","CHANNEL"]
+    
+
+    google_clients = utils.get_google_clients()
     GSPREAD_CLIENT = google_clients[0]
     DATABASE_WORKBOOK = GSPREAD_CLIENT.open('trading_simulator_db')
     SYSTEM_INFO_WS = DATABASE_WORKBOOK.worksheet("SYSTEM_INFO")
@@ -240,7 +223,7 @@ def create_and_save_output_file(data, file_name, email="davidpeel.test1@gmail.co
     Returns: File Id when successfully saved to google drive
     """
 
-    google_clients = get_google_clients()
+    google_clients = utils.get_google_clients()
     GSPREAD_CLIENT = google_clients[0]
     GDRIVE_CLIENT = google_clients[1]
 
@@ -271,11 +254,9 @@ def create_and_save_output_file(data, file_name, email="davidpeel.test1@gmail.co
     
     return new_file["id"]
 
-# move this to trading simulator
 def update_system_date():
 
-    
-    google_clients = get_google_clients()
+    google_clients = utils.get_google_clients()
     GSPREAD_CLIENT = google_clients[0]
     DATABASE_WORKBOOK = GSPREAD_CLIENT.open('trading_simulator_db')
     SYSTEM_INFO_WS = DATABASE_WORKBOOK.worksheet("SYSTEM_INFO")
@@ -292,31 +273,3 @@ def update_system_date():
 
     sys_date_string = new_trading_app_sys_date.strftime("%Y%m%d")
     SYSTEM_INFO_WS.update_acell('A2', sys_date_string)
-
-
-import gspread
-from google.oauth2.service_account import Credentials
-from googleapiclient.discovery import build
-
-def get_google_clients():
-    """
-    Function that creates a Google Spreadsheet client and
-    creates a Google Drive client that have been authenticated.
-
-    Returns a tuple of clients:
-    GSPREAD_CLIENT and GDRIVE_CLIENT
-    """
-
-    SCOPE = [
-    "https://www.googleapis.com/auth/spreadsheets",
-    "https://www.googleapis.com/auth/drive.file",
-    "https://www.googleapis.com/auth/drive"
-    ]
-
-    CREDS = Credentials.from_service_account_file('creds.json')
-    SCOPED_CREDS = CREDS.with_scopes(SCOPE)
-    # Google Sheets and Drive client connections
-    GSPREAD_CLIENT = gspread.authorize(SCOPED_CREDS)
-    GDRIVE_CLIENT = build('drive', 'v3',credentials=SCOPED_CREDS)
-
-    return GSPREAD_CLIENT, GDRIVE_CLIENT
