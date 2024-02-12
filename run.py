@@ -1,7 +1,7 @@
 from lib import app_selector
 
 if __name__ == "__main__":
-    app_selector.app_selector()
+    app_selector.run()
 
     # INTERIM HELPERS TO DELETE FILES FROM GDRIVE DURING DEVELOPMENT
     # # files = get_file_list("netting_report")

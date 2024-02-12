@@ -1,9 +1,7 @@
-def utils():
-    print("From Utils")
-
 import time
 import os
 from rich import print as rprint
+from InquirerPy import inquirer
 
 def please_wait(seconds=3):
     for _ in range(seconds):
@@ -24,3 +22,20 @@ def exit_message():
     os.system("clear")
 
     raise SystemExit
+
+def list_select_menu(menu):
+    '''
+    Menu generation function that takes in a dict containing
+    a question as the key then another dict of responses and 
+    functions associated with those responses
+    
+    Returns: The executed function based on the response
+    '''
+    question = list(menu.keys())[0]
+    choices_keys = menu[question].keys()
+    result = inquirer.select(
+    message=question,
+    choices=choices_keys,
+    ).execute()
+
+    return menu[question][result]()
