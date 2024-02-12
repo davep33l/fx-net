@@ -1,10 +1,16 @@
 from . import utils
 
 GSPREAD_CLIENT, GDRIVE_CLIENT = utils.get_google_clients()
-DATABASE_WORKBOOK = GSPREAD_CLIENT.open('fx_net_db')
-DATABASE_WORKBOOK_TA = GSPREAD_CLIENT.open('trading_simulator_db')
 
-# Worksheet connections
-TRADES_DATA_WS = DATABASE_WORKBOOK.worksheet("TRADES")
-FILES_LOADED_WS = DATABASE_WORKBOOK.worksheet("FILES_LOADED")
-SYSTEM_INFO_WS = DATABASE_WORKBOOK_TA.worksheet("SYSTEM_INFO")
+# FX Net database connection
+FX_NET_DB = GSPREAD_CLIENT.open('fx_net_db')
+
+# FX Net table connections
+FX_NET_DB_TRADES_TABLE = FX_NET_DB.worksheet("TRADES")
+FX_NET_DB_FILES_LOADED_TABLE = FX_NET_DB.worksheet("FILES_LOADED")
+
+# Trading Simulator connection
+TRADING_SIMULATOR_DB = GSPREAD_CLIENT.open('trading_simulator_db')
+
+# Trading Simulator connections
+TRADING_SIMULATOR_DB_SYSTEM_INFO_TABLE = TRADING_SIMULATOR_DB.worksheet("SYSTEM_INFO")

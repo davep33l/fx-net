@@ -8,7 +8,7 @@ from rich import print as rprint
 
 from lib import utils
 from lib.app_selector import app_selector
-from lib.database import SYSTEM_INFO_WS
+from lib.database import TRADING_SIMULATOR_DB_SYSTEM_INFO_TABLE
 
 # Move to trading_simulator folder
 def trading_sim_menu():
@@ -82,7 +82,6 @@ def create_simulated_trade_data(quantity_of_trades):
     and the file name.
     """
 
-    
     CLIENTS = {
         'Capital Trading': ['Max Scott', 'Ava Lee'],
         'Nova Wealth': ['Leo Chen', 'Mia Hall'],
@@ -133,23 +132,16 @@ def create_simulated_trade_data(quantity_of_trades):
                 "CCY_PAIR","BUY_CCY","BUY_AMT","RATE","SELL_CCY","SELL_AMT",
                 "TRADE_DATE", "VALUE_DATE","CHANNEL"]
     
-
-    google_clients = utils.get_google_clients()
-    GSPREAD_CLIENT = google_clients[0]
-    DATABASE_WORKBOOK = GSPREAD_CLIENT.open('trading_simulator_db')
-    SYSTEM_INFO_WS = DATABASE_WORKBOOK.worksheet("SYSTEM_INFO")
-
     # Variable connections from worksheets
-    trade_date = SYSTEM_INFO_WS.range("A2")[0].value
+    trade_date = TRADING_SIMULATOR_DB_SYSTEM_INFO_TABLE.range("A2")[0].value
 
     # Error checking
     try:
         datetime.strptime(trade_date, "%Y%m%d")
-    except ValueError:
+    except ValueError as e:
         raise ValueError(
             "Invalid date format."
-            "Please provide a date in the format YYYYMMDD."
-            )
+            "Please provide a date in the format YYYYMMDD.") from e
 
     if not isinstance(quantity_of_trades, int) or quantity_of_trades <= 0:
         raise ValueError("Invalid quantity."
@@ -164,7 +156,7 @@ def create_simulated_trade_data(quantity_of_trades):
 
         # Get random client name
         client = random.choice(list(CLIENTS.keys()))
-        
+
         # Get random trader associated with the random client
         client_trader = random.choice(CLIENTS[client])
 
@@ -205,21 +197,23 @@ def create_simulated_trade_data(quantity_of_trades):
 
         # Sets the trade date based on the input of the function
         trade_date_string = trade_date
-        trade_date_ISO_format = datetime.strptime(trade_date_string, "%Y%m%d")
+        trade_date_iso_format = datetime.strptime(trade_date_string, "%Y%m%d")
 
         # Ensures the value date is always the next business day
-        value_date_ISO_format = trade_date_ISO_format + timedelta(1)
+        value_date_iso_format = trade_date_iso_format + timedelta(1)
         # Check if the day is Saturday (5) or Sunday (6) and increases until it is a weekday
-        while value_date_ISO_format.weekday() >= 5:
-            value_date_ISO_format += timedelta(days=1)
+        while value_date_iso_format.weekday() >= 5:
+            value_date_iso_format += timedelta(days=1)
 
-        value_date_string = value_date_ISO_format.strftime("%Y%m%d")
+        value_date_string = value_date_iso_format.strftime("%Y%m%d")
 
         # Get random trading channel
         channel = random.choice(CHANNELS)
 
-        trade_data_list = [client, client_trader, bank_trader, trade_id, ccy_pair, buy_ccy, buy_amt, rate, sell_ccy, sell_amt, trade_date_string, value_date_string, channel]
-        
+        trade_data_list = [client, client_trader, bank_trader, trade_id,
+                           ccy_pair, buy_ccy, buy_amt, rate, sell_ccy, sell_amt,
+                           trade_date_string, value_date_string, channel]
+
         # Return values
         full_data.append(trade_data_list)
         file_name = f'trade_data_{trade_date}'
@@ -282,14 +276,14 @@ def update_system_date():
     simulate a real world trading application as you cannot physically
     books trades in the past. 
     '''
-    trading_app_sys_date = SYSTEM_INFO_WS.range("A2")[0].value
+    trading_app_sys_date = TRADING_SIMULATOR_DB_SYSTEM_INFO_TABLE.range("A2")[0].value
 
-    trading_app_sys_date_ISO_format = datetime.strptime(trading_app_sys_date, "%Y%m%d")
+    trading_app_sys_date_iso_format = datetime.strptime(trading_app_sys_date, "%Y%m%d")
 
-    new_trading_app_sys_date = trading_app_sys_date_ISO_format + timedelta(1)
+    new_trading_app_sys_date = trading_app_sys_date_iso_format + timedelta(1)
 
     while new_trading_app_sys_date.weekday() >= 5:
         new_trading_app_sys_date += timedelta(days=1)
 
     sys_date_string = new_trading_app_sys_date.strftime("%Y%m%d")
-    SYSTEM_INFO_WS.update_acell('A2', sys_date_string)
+    TRADING_SIMULATOR_DB_SYSTEM_INFO_TABLE.update_acell('A2', sys_date_string)

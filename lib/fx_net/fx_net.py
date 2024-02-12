@@ -1,3 +1,7 @@
+'''
+TBD
+'''
+
 import os
 import time
 from rich import print as rprint
@@ -7,9 +11,8 @@ import pandas as pd
 
 from lib import utils
 from lib.database import GDRIVE_CLIENT, GSPREAD_CLIENT
-from lib.database import TRADES_DATA_WS, FILES_LOADED_WS 
+from lib.database import FX_NET_DB_TRADES_TABLE, FX_NET_DB_FILES_LOADED_TABLE 
 from lib.app_selector import app_selector
-
 
 # Move to fx_net folder
 def fx_net_menu():
@@ -73,7 +76,6 @@ def load_fx_data():
     function is run. 
 
     '''
-
     file_data = get_eligible_files_to_load()
     file_names = [file_name[0] for file_name in file_data]
 
@@ -90,20 +92,18 @@ def load_fx_data():
                 chosen_file_id = file[1]
 
         rprint("[green]Loading data to FX Net database...please wait")
-        
-        # NOTE1: temporary code to get file id is in the above code, 
-        # will refactor into a date selection
-        # so that the apps can run independantly and give options for 
-        #user to select a date to load
         output_file = GSPREAD_CLIENT.open_by_key(chosen_file_id)
         data_to_move = output_file.sheet1.get_all_values()
-        TRADES_DATA_WS.append_rows(data_to_move[1:])
+        FX_NET_DB_TRADES_TABLE.append_rows(data_to_move[1:])
         rprint("[green]Data has been successfully loaded into FX Net database")
 
         file_trade_date = choice[-8:]
-        FILES_LOADED_WS.append_row([choice, file_trade_date, chosen_file_id])
+        FX_NET_DB_FILES_LOADED_TABLE.append_row([choice, file_trade_date, chosen_file_id])
 
 def return_to_previous_menu():
+    '''
+    Returns to the app_selector menu.
+    '''
     print("Returning previous menu")
     time.sleep(1)
     os.system("clear")
@@ -147,23 +147,8 @@ def get_files_already_loaded():
 
     Returns: List of file_ids in FILES_LOADED table
     '''
-    
-    files_loaded = FILES_LOADED_WS.get_all_values()
-    df = pd.DataFrame(files_loaded[1:],columns=files_loaded[0])
-    file_ids_loaded = df['FILE_ID'].tolist()
 
-    return file_ids_loaded
-
-def get_files_already_loaded():
-    '''
-    This function checks the fx_net_db table of FILES_LOADED
-    and returns a list of file ids that have already been
-    used/loaded by the FX Net Application.
-
-    Returns: List of file_ids in FILES_LOADED table
-    '''
-    
-    files_loaded = FILES_LOADED_WS.get_all_values()
+    files_loaded = FX_NET_DB_FILES_LOADED_TABLE.get_all_values()
     df = pd.DataFrame(files_loaded[1:],columns=files_loaded[0])
     file_ids_loaded = df['FILE_ID'].tolist()
 
@@ -191,7 +176,6 @@ def get_eligible_files_to_load():
     # print(eligible_files)
 
     return eligible_files
-
 
 # move to either utils or to fx_net folder (uses a client)
 def delete_file(file_id):
@@ -249,7 +233,7 @@ def create_table():
         date = utils.fuzzy_select_menu("Type or select a date: ", dates)
 
         os.system("clear")
-        trades_data = TRADES_DATA_WS.get_all_values()
+        trades_data = FX_NET_DB_TRADES_TABLE.get_all_values()
         df = pd.DataFrame(trades_data[1:],columns=trades_data[0])
         df = df[df["VALUE_DATE"] == date]
 
@@ -281,10 +265,11 @@ def create_table():
                 else:
                     action = f"receive {ccy}"
 
-                # trade_table.add_row(client, ccy, "{:,.2f}".format(buy_sum), "{:,.2f}".format(sell_sum), "{:,.2f}".format(net), action)
-                trade_table.add_row(client, ccy, "{:,.2f}".format(net), action)
+                trade_table.add_row(client,
+                                    ccy,
+                                    "{:,.2f}".format(net), 
+                                    action)
 
-        
         console = Console()
         console.print(trade_table)
 
@@ -296,7 +281,7 @@ def get_most_recent_file():
     '''
     TBD
     '''
-    trades_data = TRADES_DATA_WS.get_all_values()
+    trades_data = FX_NET_DB_TRADES_TABLE.get_all_values()
     df = pd.DataFrame(trades_data[1:],columns=trades_data[0])
     unique_value_dates = df['VALUE_DATE'].unique()
     return unique_value_dates[-1]
@@ -325,13 +310,13 @@ def create_report_spreadsheet(value_date):
         GDRIVE_CLIENT.permissions().create(fileId=new_file['id'],body=permissions).execute()
         print(f'File created with ID: {new_file["id"]}')
 
-        trades_data = TRADES_DATA_WS.get_all_values()
+        trades_data = FX_NET_DB_TRADES_TABLE.get_all_values()
         df = pd.DataFrame(trades_data[1:],columns=trades_data[0])
         data = df[df['VALUE_DATE'] == value_date]
         # print(data)
         # print(type(data))
-        headings = df.columns.tolist()
-        list_of_data = df.values.tolist()
+        headings = data.columns.tolist()
+        list_of_data = data.values.tolist()
 
         workbook = GSPREAD_CLIENT.open_by_key(new_file["id"])
         data_sheet = workbook.add_worksheet(title="Data", rows=100, cols=20)
@@ -352,11 +337,12 @@ def create_report_spreadsheet(value_date):
 
 # Move to fx_net folder (uses a client)
 def get_available_report_value_dates():
-
-    all_data = TRADES_DATA_WS.get_all_values()
+    '''
+    TBD
+    '''
+    all_data = FX_NET_DB_TRADES_TABLE.get_all_values()
     df = pd.DataFrame(all_data[1:],columns=all_data[0])
 
-    
     value_dates = df['VALUE_DATE'].unique()
     if len(value_dates) > 0:
         return value_dates
