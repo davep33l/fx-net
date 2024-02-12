@@ -53,12 +53,12 @@ def reporting_menu():
 
         reporting_menu_question = {
         "Please select an option?": {
-        "Show Netting Summary by Value Date (working)": create_table,
+        "Netting Summary by Value Date": netting_summary_by_value_date,
         "Create Netting Report by Value Date (WIP)": reporting_menu,
         "Create payment files (WIP)": reporting_menu,
-        "Show trade count by clients (WIP)": reporting_menu,
-        "Show trade count by client and client trader (WIP)": reporting_menu,
-        "Show trade count by bank trader (WIP)": reporting_menu,
+        "Trade count by client": trade_count_by_client,
+        "Trade count by client and client trader (WIP)": reporting_menu,
+        "Trade count by bank trader": trade_count_by_bank_trader,
         "Return to main menu (working)": fx_net_menu,
         }}
         utils.list_select_menu(reporting_menu_question)
@@ -219,7 +219,7 @@ def get_file_list(file_name_filter=None):
     return list_of_files
 
 # move to fx_net folder (uses a client)
-def create_table():
+def netting_summary_by_value_date():
     '''
     TBD
     '''
@@ -348,3 +348,47 @@ def get_available_report_value_dates():
         return value_dates
     else:
         return []
+
+def trade_count_by_client(trade_date_filter=None):
+    os.system("clear")
+    trades_data = FX_NET_DB_TRADES_TABLE.get_all_values()
+    df = pd.DataFrame(trades_data[1:],columns=trades_data[0])
+
+    client_trade_counts = list(df['CLIENT_NAME'].value_counts().items())
+
+    trade_count_table = Table(title=f"\n\nTrade Count by Client")
+    trade_count_table.add_column("Client Name", justify="center", style="white")
+    trade_count_table.add_column("Count of Trades Booked", justify="center", style="white")
+
+    for client, count_of_trades in client_trade_counts:
+        trade_count_table.add_row(client,
+                                  str(count_of_trades))
+    console = Console()
+    console.print(trade_count_table)
+
+    rprint("[cyan]Scroll to see full table if required")
+    input("Press Enter to continue")
+
+def trade_count_by_client_and_trader(trade_date_filter=None):
+    pass
+
+def trade_count_by_bank_trader(trade_date_filter=None):
+    os.system("clear")
+    trades_data = FX_NET_DB_TRADES_TABLE.get_all_values()
+    df = pd.DataFrame(trades_data[1:],columns=trades_data[0])
+
+    bank_trader_trade_counts = list(df['BANK_TRADER'].value_counts().items())
+
+    trade_count_table = Table(title=f"\n\nTrade Count by Bank Trader")
+    trade_count_table.add_column("Bank Trader Name", justify="center", style="white")
+    trade_count_table.add_column("Count of Trades Booked", justify="center", style="white")
+
+    for client, count_of_trades in bank_trader_trade_counts:
+        trade_count_table.add_row(client,
+                                  str(count_of_trades))
+    console = Console()
+    console.print(trade_count_table)
+
+    rprint("[cyan]Scroll to see full table if required")
+    input("Press Enter to continue")
+
