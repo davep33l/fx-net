@@ -19,11 +19,13 @@ def fx_net_menu():
     rprint("[green]Opening the FX Net Application")
     utils.please_wait()
     os.system("clear")
-    rprint("[green]FX Net is open") # call the FX Net app here
+    rprint("[green]FX Net is open")
     time.sleep(1)
     while True:
         os.system("clear")
         rprint("[cyan]--- FX NET ---\n")
+        rprint("[bold underline]Main Menu\n")
+
         fx_net_menu_question = {
         "Please select an option?": {
         "Load FX Data to FX Net Database": load_fx_data,
@@ -80,7 +82,7 @@ def load_fx_data():
         rprint("[red]Please choose another option")
         time.sleep(2)
     else:
-        choice = menu("Pick a file to load", file_names)
+        choice = utils.fuzzy_select_menu("Pick a file to load", file_names)
         print(choice)
 
         for file in file_data:
@@ -106,20 +108,6 @@ def return_to_previous_menu():
     time.sleep(1)
     os.system("clear")
     app_selector.run()
-
-
-
-
-from InquirerPy import inquirer
-
-def menu_fuzzy(message, choices):
-
-    result = inquirer.fuzzy(
-        message=message, 
-        choices=choices).execute()
-
-    return result
-
 
 # Move to fx_net folder (uses a client)
 def get_trade_data_files_list():
@@ -258,7 +246,7 @@ def create_table():
         rprint("[red]Please load data or select another option")
         time.sleep(2)
     else:
-        date = menu_fuzzy("Type or select a date: ", dates)
+        date = utils.fuzzy_select_menu("Type or select a date: ", dates)
 
         os.system("clear")
         trades_data = TRADES_DATA_WS.get_all_values()

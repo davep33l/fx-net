@@ -21,6 +21,7 @@ def run():
     while True:
         os.system("clear")
         rprint("[cyan]--- APP SELECTOR ---\n")
+        rprint("[bold underline]Main Menu\n")
         app_selector_question = {
                 "Please select an option?": {
                 "Trading Simulator": trading_sim_menu,

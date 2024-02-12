@@ -8,10 +8,16 @@ from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
 
 def please_wait(seconds=3):
+    '''
+    Helper function to print please wait to the console.
+    It takes in an integer param which determines how many
+    periods to print (and how many seconds to wait)
+    '''
     for _ in range(seconds):
         time.sleep(1)
         os.system("clear")
         rprint("[green]Please wait" + "." * (_ + 1))
+    os.system("clear")
 
 def exit_message():
     '''
@@ -41,6 +47,30 @@ def list_select_menu(menu):
     ).execute()
 
     return menu[question][result]()
+
+# Specficially used this part of the documentation to work out how
+# to validate the input of a fuzzy menu
+# https://inquirerpy.readthedocs.io/en/latest/pages/prompts/fuzzy.html#codecell1
+def fuzzy_select_menu(message, choices):
+    '''
+    Menu generation function for a fuzzy search menu. 
+    You need to pass in a message and a list of choices.
+    There is a validation to check if the choice is in the 
+    initial list you passed in.
+
+    Returns the choice
+    '''
+
+    def validate_choice(choice):
+        if choice in choices:
+            return True
+
+    result = inquirer.fuzzy(message=message, 
+                            choices=choices,
+                            validate=validate_choice,
+                            invalid_message="Must Enter a valid date").execute()
+
+    return result
 
 def get_google_clients():
     """

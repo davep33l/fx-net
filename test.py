@@ -83,7 +83,7 @@ def list_select_menu(menu):
 # choices = menu_1[question].keys()
 # print(choices)
 
-list_select_menu(menu_1)
+# list_select_menu(menu_1)
 
 
 def fuzzy_search_menu(message, choices):
@@ -93,3 +93,22 @@ def fuzzy_search_menu(message, choices):
         choices=choices).execute()
 
     return result
+
+
+def error_check_menu():
+    action = inquirer.fuzzy(
+        message="Select actions:",
+        choices=["hello", "weather", "what", "whoa", "hey", "yo"],
+        default="he",
+    ).execute()
+    words = inquirer.fuzzy(
+        message="Select preferred words:",
+        choices=["dave","linds","ted","sasha"],
+        multiselect=True,
+        validate=lambda result: len(result) > 1,
+        invalid_message="minimum 2 selections",
+        max_height="70%",
+    ).execute()
+
+
+error_check_menu()

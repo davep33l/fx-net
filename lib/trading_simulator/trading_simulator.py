@@ -25,6 +25,8 @@ def trading_sim_menu():
     while True:
         os.system("clear")
         rprint("[cyan]--- TRADING SIMULATOR ---\n")
+        rprint("[bold underline]Main Menu\n")
+
         trading_simulator_question = {
             "Please select an option?": {
             "Generate and save trades": generate_and_save_trades,
