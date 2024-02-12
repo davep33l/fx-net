@@ -323,9 +323,7 @@ def create_table():
         rprint("[red]Please load data or select another option")
         time.sleep(2)
     else:
-        date = menus.menu("Pick a file to load", dates)
-
-
+        date = menus.menu_fuzzy("Type or select a date: ", dates)
 
         os.system("clear")
         trades_data = TRADES_DATA_WS.get_all_values()

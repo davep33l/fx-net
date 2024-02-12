@@ -23,3 +23,12 @@ def menu(question, choices):
     ).execute()
 
     return result
+
+
+def menu_fuzzy(message, choices):
+
+    result = inquirer.fuzzy(
+        message=message, 
+        choices=choices).execute()
+
+    return result
