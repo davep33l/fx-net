@@ -66,10 +66,10 @@ menu_1 = {
     }}
 
 
-def menu_dict(dict):
+def list_select_menu(menu):
 
-    question = list(menu_1.keys())[0]
-    choices_keys = menu_1[question].keys()
+    question = list(menu.keys())[0]
+    choices_keys = menu[question].keys()
     result = inquirer.select(
     message=question,
     choices=choices_keys,
@@ -83,4 +83,13 @@ def menu_dict(dict):
 # choices = menu_1[question].keys()
 # print(choices)
 
-menu_dict(menu_1)
+list_select_menu(menu_1)
+
+
+def fuzzy_search_menu(message, choices):
+
+    result = inquirer.fuzzy(
+        message=message, 
+        choices=choices).execute()
+
+    return result

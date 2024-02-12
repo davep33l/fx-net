@@ -20,6 +20,8 @@ from _app_selector import app_selector
 from _trading_simulator import trading_simulator_menu, trading_simulator
 from _utils import utils
 
+from lib import app_selector, trading_simulator, fx_net, utils
+
 
 GSPREAD_CLIENT, GDRIVE_CLIENT = get_google_clients()
 DATABASE_WORKBOOK = GSPREAD_CLIENT.open('fx_net_db')
@@ -37,17 +39,19 @@ def run():
     '''
     TBD
     '''
-    os.system("clear")
+    # os.system("clear")
 
 
-    while True:
-        response = app_selector.run()
-        if response == app_selector.choices[0]:
-            trading_sim_menu()
-        elif response == app_selector.choices[1]:
-            fx_net_menu()
-        elif response == app_selector.choices[2]:
-            exit_message()
+    # while True:
+    #     response = app_selector.run()
+    #     if response == app_selector.choices[0]:
+    #         trading_sim_menu()
+    #     elif response == app_selector.choices[1]:
+    #         fx_net_menu()
+    #     elif response == app_selector.choices[2]:
+    #         exit_message()
+
+    app_selector.app_selector()
 
     # input("Press enter key to exit: ")
 
@@ -236,47 +240,47 @@ def exit_message():
 
     raise SystemExit
 
-# Move to trading_simulator folder
-def trading_sim_menu():
-    '''
-    TBD
-    '''
-    os.system("clear")
-    rprint("[green]Opening the Trading Simulator")
-    utils.please_wait()
-    rprint("[green]Trading App is open")
-    time.sleep(2)
-    os.system("clear")
+# # Move to trading_simulator folder
+# def trading_sim_menu():
+#     '''
+#     TBD
+#     '''
+#     os.system("clear")
+#     rprint("[green]Opening the Trading Simulator")
+#     utils.please_wait()
+#     rprint("[green]Trading App is open")
+#     time.sleep(2)
+#     os.system("clear")
 
-    while True:
-        ts_response = trading_simulator_menu.run()
-        if ts_response == trading_simulator_menu.choices[0]:
+#     while True:
+#         ts_response = trading_simulator_menu.run()
+#         if ts_response == trading_simulator_menu.choices[0]:
 
-            rprint("[green]Generating trade file...please wait")
-            data, file = trading_simulator.create_simulated_trade_data(int(random.uniform(50,150)))
-            global file_id
-            file_id = trading_simulator.create_and_save_output_file(data, file) # NOTE1
-            rprint("[green]Data has been successfully generated and saved")
-            trading_simulator.update_system_date()
-            rprint("[green]System Date of the trading application has now been rolled")
-            time.sleep(1)
+#             rprint("[green]Generating trade file...please wait")
+#             data, file = trading_simulator.create_simulated_trade_data(int(random.uniform(50,150)))
+#             global file_id
+#             file_id = trading_simulator.create_and_save_output_file(data, file) # NOTE1
+#             rprint("[green]Data has been successfully generated and saved")
+#             trading_simulator.update_system_date()
+#             rprint("[green]System Date of the trading application has now been rolled")
+#             time.sleep(1)
 
 
-            # rprint("[cyan]You will now be automatically logged into FX Net")
+#             # rprint("[cyan]You will now be automatically logged into FX Net")
 
-            # while True:
-            #     fx_net_response = menus.menu(menus.menu_2_question, menus.menu_2_choices)
-            #     if fx_net_response == menus.menu_2_choices[0]:
-            #         load_fx_data()
-            #     elif fx_net_response == menus.menu_2_choices[1]:
-            #         reporting_menu()
-            #     elif fx_net_response == menus.menu_2_choices[2]:
-            #         break
-        elif ts_response == trading_simulator_menu.choices[1]:
-            print("Returning to main menu")
-            time.sleep(1)
-            os.system("clear")
-            break
+#             # while True:
+#             #     fx_net_response = menus.menu(menus.menu_2_question, menus.menu_2_choices)
+#             #     if fx_net_response == menus.menu_2_choices[0]:
+#             #         load_fx_data()
+#             #     elif fx_net_response == menus.menu_2_choices[1]:
+#             #         reporting_menu()
+#             #     elif fx_net_response == menus.menu_2_choices[2]:
+#             #         break
+#         elif ts_response == trading_simulator_menu.choices[1]:
+#             print("Returning to main menu")
+#             time.sleep(1)
+#             os.system("clear")
+#             break
 
 # move to either utils or to fx_net folder
 def delete_file(file_id):
@@ -435,6 +439,7 @@ def create_report_spreadsheet(value_date):
 
     return new_file["id"]
 
+# Move to fx_net folder
 def get_available_report_value_dates():
 
     all_data = TRADES_DATA_WS.get_all_values()
