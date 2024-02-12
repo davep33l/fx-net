@@ -1,13 +1,14 @@
 import os
 import time
 from rich import print as rprint
+from rich.console import Console
+from rich.table import Table
+import pandas as pd
 
 from lib import utils
 from lib.database import GDRIVE_CLIENT, GSPREAD_CLIENT
 from lib.database import TRADES_DATA_WS, FILES_LOADED_WS 
-
-def fx_net():
-    print("From FX Net")
+from lib.app_selector import app_selector
 
 
 # Move to fx_net folder
@@ -15,26 +16,21 @@ def fx_net_menu():
     '''
     TBD
     '''
-
     rprint("[green]Opening the FX Net Application")
     utils.please_wait()
     os.system("clear")
     rprint("[green]FX Net is open") # call the FX Net app here
     time.sleep(1)
     while True:
-
-        fx_net_response = menu(menu_2_question, menu_2_choices)
-        if fx_net_response == menu_2_choices[0]:
-            load_fx_data()
-        elif fx_net_response == menu_2_choices[1]:
-            reporting_menu()
-            break
-        elif fx_net_response == menu_2_choices[2]:
-            print("Returning previous menu")
-            time.sleep(1)
-            os.system("clear")
-            break
-
+        os.system("clear")
+        rprint("[cyan]--- FX NET ---\n")
+        fx_net_menu_question = {
+        "Please select an option?": {
+        "Load FX Data to FX Net Database": load_fx_data,
+        "Reporting Menu": reporting_menu,
+        "Return to previous menu": return_to_previous_menu,
+        }}
+        utils.list_select_menu(fx_net_menu_question)
 
 # Move to fx_net folder
 def reporting_menu():
@@ -47,57 +43,74 @@ def reporting_menu():
     os.system("clear")
     while True:
         os.system("clear")
-        rprint("\nWelcome to the analsyis menu\n")
-        rep_response = menu(menu_3_question, menu_3_choices)
+        rprint("[cyan]--- FX NET ---\n")
+        rprint("Reporting / Analysis Menu\n")
 
-        if rep_response == menu_3_choices[0]:
-            # print("creating table")
-            # time.sleep(1)
-            create_table()
-        elif rep_response == menu_3_choices[1]:
-            # create_report_spreadsheet("20240625")
-            pass
-        elif rep_response == menu_3_choices[2]:
-            pass
-        elif rep_response == menu_3_choices[3]:
-            pass
-        elif rep_response == menu_3_choices[4]:
-            pass
-        elif rep_response == menu_3_choices[5]:
-            pass
-        elif rep_response == menu_3_choices[6]:
-            print("Returning previous menu")
-            time.sleep(1)
-            os.system("clear")
-            return
+        reporting_menu_question = {
+        "Please select an option?": {
+        "Show Netting Summary by Value Date (working)": create_table,
+        "Create Netting Report by Value Date (WIP)": reporting_menu,
+        "Create payment files (WIP)": reporting_menu,
+        "Show trade count by clients (WIP)": reporting_menu,
+        "Show trade count by client and client trader (WIP)": reporting_menu,
+        "Show trade count by bank trader (WIP)": reporting_menu,
+        "Return to main menu (working)": fx_net_menu,
+        }}
+        utils.list_select_menu(reporting_menu_question)
+
+def load_fx_data():
+    '''
+    This function first checks if the available files in the shared folder
+    have already been loaded and returns a list of files that have not
+    been loaded into FX Net yet. 
+    It gives the user a prompt to select the file they wish to load, if there 
+    are no files available to load it informs the user and returns to the
+    menu. 
+    Once the file is loaded, the file name, trade date and file id are
+    added to the FILES_LOADED table, so it can be checked next time the
+    function is run. 
+
+    '''
+
+    file_data = get_eligible_files_to_load()
+    file_names = [file_name[0] for file_name in file_data]
+
+    if not file_names:
+        rprint("[red]No more data to load")
+        rprint("[red]Please choose another option")
+        time.sleep(2)
+    else:
+        choice = menu("Pick a file to load", file_names)
+        print(choice)
+
+        for file in file_data:
+            if file[0] == choice:
+                chosen_file_id = file[1]
+
+        rprint("[green]Loading data to FX Net database...please wait")
+        
+        # NOTE1: temporary code to get file id is in the above code, 
+        # will refactor into a date selection
+        # so that the apps can run independantly and give options for 
+        #user to select a date to load
+        output_file = GSPREAD_CLIENT.open_by_key(chosen_file_id)
+        data_to_move = output_file.sheet1.get_all_values()
+        TRADES_DATA_WS.append_rows(data_to_move[1:])
+        rprint("[green]Data has been successfully loaded into FX Net database")
+
+        file_trade_date = choice[-8:]
+        FILES_LOADED_WS.append_row([choice, file_trade_date, chosen_file_id])
+
+def return_to_previous_menu():
+    print("Returning previous menu")
+    time.sleep(1)
+    os.system("clear")
+    app_selector.run()
+
+
 
 
 from InquirerPy import inquirer
-
-menu_1_question = "Do you want to proceed with creating the simulated data?"
-menu_1_choices = ["Yes", "Exit program"]
-
-menu_2_question = "Please choose an option?"
-menu_2_choices = ["Load Data", "Reporting Menu", "Return to previous menu"]
-
-menu_3_question = "Please select an option"
-menu_3_choices = ["Show Netting Summary by Value Date (working)",
-                  "Create Netting Report by Value Date (WIP)",
-                   "Create payment files (WIP)",
-                   "Show trade count by clients (WIP)",
-                   "Show trade count by client and client trader (WIP)",
-                   "Show trade count by bank trader (WIP)",
-                   "Return to main menu (working)"]
-
-def menu(question, choices):
-
-    result = inquirer.select(
-    message=question,
-    choices=choices,
-    ).execute()
-
-    return result
-
 
 def menu_fuzzy(message, choices):
 
@@ -137,10 +150,6 @@ def get_trade_data_files_list():
                 trade_files.append((file['name'], file['id']))
 
     return trade_files
-
-from rich.console import Console
-from rich.table import Table
-import pandas as pd
 
 def get_files_already_loaded():
     '''
@@ -195,49 +204,6 @@ def get_eligible_files_to_load():
 
     return eligible_files
 
-
-def load_fx_data():
-    '''
-    This function first checks if the available files in the shared folder
-    have already been loaded and returns a list of files that have not
-    been loaded into FX Net yet. 
-    It gives the user a prompt to select the file they wish to load, if there 
-    are no files available to load it informs the user and returns to the
-    menu. 
-    Once the file is loaded, the file name, trade date and file id are
-    added to the FILES_LOADED table, so it can be checked next time the
-    function is run. 
-
-    '''
-
-    file_data = get_eligible_files_to_load()
-    file_names = [file_name[0] for file_name in file_data]
-
-    if not file_names:
-        rprint("[red]No more data to load")
-        rprint("[red]Please choose another option")
-        time.sleep(2)
-    else:
-        choice = menu("Pick a file to load", file_names)
-        print(choice)
-
-        for file in file_data:
-            if file[0] == choice:
-                chosen_file_id = file[1]
-
-        rprint("[green]Loading data to FX Net database...please wait")
-        
-        # NOTE1: temporary code to get file id is in the above code, 
-        # will refactor into a date selection
-        # so that the apps can run independantly and give options for 
-        #user to select a date to load
-        output_file = GSPREAD_CLIENT.open_by_key(chosen_file_id)
-        data_to_move = output_file.sheet1.get_all_values()
-        TRADES_DATA_WS.append_rows(data_to_move[1:])
-        rprint("[green]Data has been successfully loaded into FX Net database")
-
-        file_trade_date = choice[-8:]
-        FILES_LOADED_WS.append_row([choice, file_trade_date, chosen_file_id])
 
 # move to either utils or to fx_net folder (uses a client)
 def delete_file(file_id):

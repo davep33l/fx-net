@@ -16,13 +16,15 @@ def trading_sim_menu():
     TBD
     '''
     os.system("clear")
-    rprint("[green]Opening the Trading Simulator")
+    rprint("[green]Opening the TRADING SIMULATOR")
     utils.please_wait()
-    rprint("[green]Trading App is open")
+    rprint("[green]TRADING SIMULATOR is now open")
     time.sleep(2)
     os.system("clear")
 
     while True:
+        os.system("clear")
+        rprint("[cyan]--- TRADING SIMULATOR ---\n")
         trading_simulator_question = {
             "Please select an option?": {
             "Generate and save trades": generate_and_save_trades,
@@ -31,23 +33,37 @@ def trading_sim_menu():
 
         utils.list_select_menu(trading_simulator_question)
 
-def return_to_previous_menu():
-    print("Returning to main menu")
-    time.sleep(1)
-    os.system("clear")
-    app_selector.run()
- 
+# Menu selection related function
 def generate_and_save_trades():
+    '''
+    This function calls the create_simulated_trade_data function to 
+    create a random file of trades betwee 50,150
+
+    Then creates the file of data and saves tthe file. It makes the file
+    shared to a specific email address.
+    '''
     
     rprint("[green]Generating trade file...please wait")
     data, file = create_simulated_trade_data(int(random.uniform(50,150)))
-    global file_id
-    file_id = create_and_save_output_file(data, file) # NOTE1
+    create_and_save_output_file(data, file) # NOTE1
     rprint("[green]Data has been successfully generated and saved")
     update_system_date()
     rprint("[green]System Date of the trading application has now been rolled")
     time.sleep(1)
 
+# Menu selection related function
+def return_to_previous_menu():
+    '''
+    Small function to inform user of returning to main menu.
+    Calls the app_selector.run() function from the app_selector
+    module
+    '''
+    print("Returning to main menu")
+    time.sleep(1)
+    os.system("clear")
+    app_selector.run()
+ 
+# Helper function for generate_and_save_trades
 def create_simulated_trade_data(quantity_of_trades):
 
     """
@@ -208,6 +224,7 @@ def create_simulated_trade_data(quantity_of_trades):
 
     return full_data, file_name
 
+# Helper function for generate_and_save_trades
 def create_and_save_output_file(data, file_name, email="davidpeel.test1@gmail.com"):
     """
     Using the Trading data, it creates a file and saves to google
@@ -255,14 +272,14 @@ def create_and_save_output_file(data, file_name, email="davidpeel.test1@gmail.co
     
     return new_file["id"]
 
+# Helper function for generate_and_save_trades
 def update_system_date():
-
-    # google_clients = utils.get_google_clients()
-    # GSPREAD_CLIENT = google_clients[0]
-    # DATABASE_WORKBOOK = GSPREAD_CLIENT.open('trading_simulator_db')
-    # SYSTEM_INFO_WS = DATABASE_WORKBOOK.worksheet("SYSTEM_INFO")
-
-    # Variable connections from worksheets
+    '''
+    Updates system date by 1 business date, so that when the next
+    file is generated, it is not of the same trade date. This is to
+    simulate a real world trading application as you cannot physically
+    books trades in the past. 
+    '''
     trading_app_sys_date = SYSTEM_INFO_WS.range("A2")[0].value
 
     trading_app_sys_date_ISO_format = datetime.strptime(trading_app_sys_date, "%Y%m%d")

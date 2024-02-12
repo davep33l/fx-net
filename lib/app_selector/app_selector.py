@@ -5,6 +5,8 @@ application you wish to run.
 #Build in imports
 import os
 
+from rich import print as rprint
+
 # Module imports
 from ..trading_simulator.trading_simulator import trading_sim_menu
 from ..fx_net.fx_net import fx_net_menu
@@ -18,7 +20,7 @@ def run():
     '''
     while True:
         os.system("clear")
-
+        rprint("[cyan]--- APP SELECTOR ---\n")
         app_selector_question = {
                 "Please select an option?": {
                 "Trading Simulator": trading_sim_menu,
