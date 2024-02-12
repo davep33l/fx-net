@@ -8,6 +8,7 @@ from rich import print as rprint
 
 from lib import utils
 from lib.app_selector import app_selector
+from lib.database import SYSTEM_INFO_WS
 
 # Move to trading_simulator folder
 def trading_sim_menu():
@@ -256,10 +257,10 @@ def create_and_save_output_file(data, file_name, email="davidpeel.test1@gmail.co
 
 def update_system_date():
 
-    google_clients = utils.get_google_clients()
-    GSPREAD_CLIENT = google_clients[0]
-    DATABASE_WORKBOOK = GSPREAD_CLIENT.open('trading_simulator_db')
-    SYSTEM_INFO_WS = DATABASE_WORKBOOK.worksheet("SYSTEM_INFO")
+    # google_clients = utils.get_google_clients()
+    # GSPREAD_CLIENT = google_clients[0]
+    # DATABASE_WORKBOOK = GSPREAD_CLIENT.open('trading_simulator_db')
+    # SYSTEM_INFO_WS = DATABASE_WORKBOOK.worksheet("SYSTEM_INFO")
 
     # Variable connections from worksheets
     trading_app_sys_date = SYSTEM_INFO_WS.range("A2")[0].value

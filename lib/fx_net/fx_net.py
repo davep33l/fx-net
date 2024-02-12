@@ -3,6 +3,8 @@ import time
 from rich import print as rprint
 
 from lib import utils
+from lib.database import GDRIVE_CLIENT, GSPREAD_CLIENT
+from lib.database import TRADES_DATA_WS, FILES_LOADED_WS 
 
 def fx_net():
     print("From FX Net")
@@ -23,7 +25,6 @@ def fx_net_menu():
 
         fx_net_response = menu(menu_2_question, menu_2_choices)
         if fx_net_response == menu_2_choices[0]:
-            # print("loading fx data")
             load_fx_data()
         elif fx_net_response == menu_2_choices[1]:
             reporting_menu()
@@ -105,50 +106,6 @@ def menu_fuzzy(message, choices):
         choices=choices).execute()
 
     return result
-
-import gspread
-from google.oauth2.service_account import Credentials
-from googleapiclient.discovery import build
-
-def get_google_clients():
-    """
-    Function that creates a Google Spreadsheet client and
-    creates a Google Drive client that have been authenticated.
-
-    Returns a tuple of clients:
-    GSPREAD_CLIENT and GDRIVE_CLIENT
-    """
-
-    SCOPE = [
-    "https://www.googleapis.com/auth/spreadsheets",
-    "https://www.googleapis.com/auth/drive.file",
-    "https://www.googleapis.com/auth/drive"
-    ]
-
-    CREDS = Credentials.from_service_account_file('creds.json')
-    SCOPED_CREDS = CREDS.with_scopes(SCOPE)
-    # Google Sheets and Drive client connections
-    GSPREAD_CLIENT = gspread.authorize(SCOPED_CREDS)
-    GDRIVE_CLIENT = build('drive', 'v3',credentials=SCOPED_CREDS)
-
-    return GSPREAD_CLIENT, GDRIVE_CLIENT
-
-GSPREAD_CLIENT, GDRIVE_CLIENT = get_google_clients()
-DATABASE_WORKBOOK = GSPREAD_CLIENT.open('fx_net_db')
-DATABASE_WORKBOOK_TA = GSPREAD_CLIENT.open('trading_simulator_db')
-
-# Worksheet connections
-TRADES_DATA_WS = DATABASE_WORKBOOK.worksheet("TRADES")
-FILES_LOADED_WS = DATABASE_WORKBOOK.worksheet("FILES_LOADED")
-SYSTEM_INFO_WS = DATABASE_WORKBOOK_TA.worksheet("SYSTEM_INFO")
-
-# Variable connections from worksheets
-trading_app_sys_date = SYSTEM_INFO_WS.range("A2")[0].value
-
-import gspread
-from google.oauth2.service_account import Credentials
-from googleapiclient.discovery import build
-
 
 
 # Move to fx_net folder (uses a client)
