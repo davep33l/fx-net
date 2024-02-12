@@ -57,7 +57,30 @@ def menu(question, choices):
 question = "Do you want to proceed with creating the simulated data?"
 choices = {"Yes": yes_answer, "Exit": exit_answer}
 
-menu(question, choices)
-# print(res)
+# menu(question, choices)
+
+menu_1 = {
+    "Do you want to proceed with creating the simulated data?": {
+        "Yes": yes_answer,
+        "Exit": exit_answer
+    }}
 
 
+def menu_dict(dict):
+
+    question = list(menu_1.keys())[0]
+    choices_keys = menu_1[question].keys()
+    result = inquirer.select(
+    message=question,
+    choices=choices_keys,
+    ).execute()
+
+    return choices[f'{result}']()
+
+# print(menu_1)
+# question = list(menu_1.keys())[0]
+# print(question)
+# choices = menu_1[question].keys()
+# print(choices)
+
+menu_dict(menu_1)
