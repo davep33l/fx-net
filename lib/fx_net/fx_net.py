@@ -56,10 +56,10 @@ def reporting_menu():
         "Netting Summary by Value Date": netting_summary_by_value_date,
         "Create Netting Report by Value Date (WIP)": reporting_menu,
         "Create payment files (WIP)": reporting_menu,
-        "Trade count by client": trade_count_by_client,
-        "Trade count by client and client trader (WIP)": reporting_menu,
-        "Trade count by bank trader": trade_count_by_bank_trader,
-        "Return to main menu (working)": fx_net_menu,
+        "Trade count by Client": trade_count_by_client,
+        "Trade count by Client and Client Trader": trade_count_by_client_and_trader,
+        "Trade count by Bank Trader": trade_count_by_bank_trader,
+        "Return to FX Net Main Menu": fx_net_menu,
         }}
         utils.list_select_menu(reporting_menu_question)
 
@@ -374,13 +374,21 @@ def trade_count_by_client_and_trader(trade_date_filter=None):
     trades_data = FX_NET_DB_TRADES_TABLE.get_all_values()
     df = pd.DataFrame(trades_data[1:],columns=trades_data[0])
 
+    client_trade_counts = dict(df.groupby(["CLIENT_NAME", "CLIENT_TRADER"])["CLIENT_TRADER"].count())
 
-    # need to either create a dataframe Clients with a sub filter of the 
-    # trade counts by trader for that client. 
-    client_trade_counts = list(df['CLIENT_TRADER'].value_counts().items())
-    print(client_trade_counts)
+    table = Table(title=f"\n\nTrades booked by Client Trader")
+    table.add_column("Client Name", justify="center", style="white")
+    table.add_column("Client Client Trader", justify="center", style="white")
+    table.add_column("Count of Trades Booked", justify="center", style="white")
 
-    pass
+    for (client, trader), client_trade_counts in client_trade_counts.items():
+        table.add_row(client, trader, str(client_trade_counts))
+
+    console = Console()
+    console.print(table)
+
+    rprint("[cyan]Scroll to see full table if required")
+    input("Press Enter to continue")
 
 def trade_count_by_bank_trader(trade_date_filter=None):
     os.system("clear")
