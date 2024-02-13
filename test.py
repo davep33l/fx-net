@@ -23,92 +23,131 @@
 # else:
 #     print("Please use a valid user account to store the files")
 
-from InquirerPy import inquirer
+# from InquirerPy import inquirer
 
 
 
 
-def yes_answer():
-    print("you selected yes")
+# def yes_answer():
+#     print("you selected yes")
 
-def exit_answer():
-    print("you selected exit")
+# def exit_answer():
+#     print("you selected exit")
 
-def menu(question, choices):
-    '''
-    This function takes in a question and a dict of choices.
-    The choices dict should contain an "answer" to the question
-    as the key and a function name as the value.
+# def menu(question, choices):
+#     '''
+#     This function takes in a question and a dict of choices.
+#     The choices dict should contain an "answer" to the question
+#     as the key and a function name as the value.
 
-    Returns the execution of the respective function based
-    on the answer given.
+#     Returns the execution of the respective function based
+#     on the answer given.
 
-    '''
+#     '''
 
-    choices_keys = list(choices.keys())
+#     choices_keys = list(choices.keys())
 
-    result = inquirer.select(
-    message=question,
-    choices=choices_keys,
-    ).execute()
+#     result = inquirer.select(
+#     message=question,
+#     choices=choices_keys,
+#     ).execute()
 
-    return choices[f'{result}']()
+#     return choices[f'{result}']()
 
-question = "Do you want to proceed with creating the simulated data?"
-choices = {"Yes": yes_answer, "Exit": exit_answer}
+# question = "Do you want to proceed with creating the simulated data?"
+# choices = {"Yes": yes_answer, "Exit": exit_answer}
 
-# menu(question, choices)
+# # menu(question, choices)
 
-menu_1 = {
-    "Do you want to proceed with creating the simulated data?": {
-        "Yes": yes_answer,
-        "Exit": exit_answer
-    }}
-
-
-def list_select_menu(menu):
-
-    question = list(menu.keys())[0]
-    choices_keys = menu[question].keys()
-    result = inquirer.select(
-    message=question,
-    choices=choices_keys,
-    ).execute()
-
-    return choices[f'{result}']()
-
-# print(menu_1)
-# question = list(menu_1.keys())[0]
-# print(question)
-# choices = menu_1[question].keys()
-# print(choices)
-
-# list_select_menu(menu_1)
+# menu_1 = {
+#     "Do you want to proceed with creating the simulated data?": {
+#         "Yes": yes_answer,
+#         "Exit": exit_answer
+#     }}
 
 
-def fuzzy_search_menu(message, choices):
+# def list_select_menu(menu):
 
-    result = inquirer.fuzzy(
-        message=message, 
-        choices=choices).execute()
+#     question = list(menu.keys())[0]
+#     choices_keys = menu[question].keys()
+#     result = inquirer.select(
+#     message=question,
+#     choices=choices_keys,
+#     ).execute()
 
-    return result
+#     return choices[f'{result}']()
 
+# # print(menu_1)
+# # question = list(menu_1.keys())[0]
+# # print(question)
+# # choices = menu_1[question].keys()
+# # print(choices)
 
-def error_check_menu():
-    action = inquirer.fuzzy(
-        message="Select actions:",
-        choices=["hello", "weather", "what", "whoa", "hey", "yo"],
-        default="he",
-    ).execute()
-    words = inquirer.fuzzy(
-        message="Select preferred words:",
-        choices=["dave","linds","ted","sasha"],
-        multiselect=True,
-        validate=lambda result: len(result) > 1,
-        invalid_message="minimum 2 selections",
-        max_height="70%",
-    ).execute()
+# # list_select_menu(menu_1)
 
 
-error_check_menu()
+# def fuzzy_search_menu(message, choices):
+
+#     result = inquirer.fuzzy(
+#         message=message, 
+#         choices=choices).execute()
+
+#     return result
+
+
+# def error_check_menu():
+#     action = inquirer.fuzzy(
+#         message="Select actions:",
+#         choices=["hello", "weather", "what", "whoa", "hey", "yo"],
+#         default="he",
+#     ).execute()
+#     words = inquirer.fuzzy(
+#         message="Select preferred words:",
+#         choices=["dave","linds","ted","sasha"],
+#         multiselect=True,
+#         validate=lambda result: len(result) > 1,
+#         invalid_message="minimum 2 selections",
+#         max_height="70%",
+#     ).execute()
+
+
+# error_check_menu()
+    
+
+
+import os
+
+from pandas import pandas as pd
+from rich import print as rprint
+from rich.console import Console
+from rich.table import Table
+
+from lib.database import FX_NET_DB_TRADES_TABLE
+
+
+    
+def trade_count_by_client_and_trader(trade_date_filter=None):
+    os.system("clear")
+    trades_data = FX_NET_DB_TRADES_TABLE.get_all_values()
+    df = pd.DataFrame(trades_data[1:],columns=trades_data[0])
+
+    client_trade_counts = dict(df.groupby(["CLIENT_NAME", "CLIENT_TRADER"])["CLIENT_TRADER"].count())
+    # print(client_trade_counts)
+    # print(client_trade_counts.keys())
+    # print(client_trade_counts.values())
+
+    table = Table(title=f"\n\nTrades booked by Client Trader")
+    table.add_column("Client Name", justify="center", style="white")
+    table.add_column("Client Client Trader", justify="center", style="white")
+    table.add_column("Count of Trades Booked", justify="center", style="white")
+
+    for (client, trader), client_trade_counts in client_trade_counts.items():
+        table.add_row(client, trader, str(client_trade_counts))
+
+    console = Console()
+    console.print(table)
+
+    rprint("[cyan]Scroll to see full table if required")
+    input("Press Enter to continue")
+
+trade_count_by_client_and_trader()

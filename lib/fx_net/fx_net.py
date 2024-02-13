@@ -370,6 +370,16 @@ def trade_count_by_client(trade_date_filter=None):
     input("Press Enter to continue")
 
 def trade_count_by_client_and_trader(trade_date_filter=None):
+    os.system("clear")
+    trades_data = FX_NET_DB_TRADES_TABLE.get_all_values()
+    df = pd.DataFrame(trades_data[1:],columns=trades_data[0])
+
+
+    # need to either create a dataframe Clients with a sub filter of the 
+    # trade counts by trader for that client. 
+    client_trade_counts = list(df['CLIENT_TRADER'].value_counts().items())
+    print(client_trade_counts)
+
     pass
 
 def trade_count_by_bank_trader(trade_date_filter=None):
