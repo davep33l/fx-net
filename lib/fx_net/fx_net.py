@@ -34,6 +34,7 @@ def fx_net_menu():
         "Load FX Data to FX Net Database": load_fx_data,
         "Reporting Menu": reporting_menu,
         "Return to previous menu": return_to_previous_menu,
+        "Exit Program": utils.exit_message,
         }}
         utils.list_select_menu(fx_net_menu_question)
 
@@ -61,6 +62,7 @@ def reporting_menu():
         "Trade count by Client and Client Trader": trade_count_by_client_and_trader,
         "Trade count by Bank Trader": trade_count_by_bank_trader,
         "Return to FX Net Main Menu": fx_net_menu,
+        "Exit Program": utils.exit_message,
         }}
         utils.list_select_menu(reporting_menu_question)
 
@@ -356,15 +358,14 @@ def trade_count_by_client(trade_date_filter=False):
 
         client_trade_counts = list(df['CLIENT_NAME'].value_counts().items())
 
-        trade_count_table = Table(title=f"\n\nTrade Count by Client - {date}")
-        trade_count_table.add_column("Client Name", justify="center", style="white")
-        trade_count_table.add_column("Count of Trades Booked", justify="center", style="white")
+        table = Table(title=f"\n\nTrade Count by Client - {date}")
+        table.add_column("Client Name", justify="center", style="white")
+        table.add_column("Count of Trades Booked", justify="center", style="white")
 
         for client, count_of_trades in client_trade_counts:
-            trade_count_table.add_row(client,
-                                    str(count_of_trades))
+            table.add_row(client, str(count_of_trades))
         console = Console()
-        console.print(trade_count_table)
+        console.print(table)
 
         rprint("[cyan]Scroll to see full table if required")
         input("Press Enter to continue")
@@ -423,15 +424,14 @@ def trade_count_by_bank_trader(trade_date_filter=None):
 
     bank_trader_trade_counts = list(df['BANK_TRADER'].value_counts().items())
 
-    trade_count_table = Table(title=f"\n\nTrade Count by Bank Trader")
-    trade_count_table.add_column("Bank Trader Name", justify="center", style="white")
-    trade_count_table.add_column("Count of Trades Booked", justify="center", style="white")
+    table = Table(title=f"\n\nTrade Count by Bank Trader")
+    table.add_column("Bank Trader Name", justify="center", style="white")
+    table.add_column("Count of Trades Booked", justify="center", style="white")
 
     for client, count_of_trades in bank_trader_trade_counts:
-        trade_count_table.add_row(client,
-                                  str(count_of_trades))
+        table.add_row(client, str(count_of_trades))
     console = Console()
-    console.print(trade_count_table)
+    console.print(table)
 
     rprint("[cyan]Scroll to see full table if required")
     input("Press Enter to continue")

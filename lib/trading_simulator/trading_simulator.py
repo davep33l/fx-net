@@ -30,7 +30,8 @@ def trading_sim_menu():
         trading_simulator_question = {
             "Please select an option?": {
             "Generate and save trades": generate_and_save_trades,
-            "Return to previous menu": return_to_previous_menu
+            "Return to previous menu": return_to_previous_menu,
+            "Exit Program": utils.exit_message,
             }}
 
         utils.list_select_menu(trading_simulator_question)
