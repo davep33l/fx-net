@@ -11,10 +11,12 @@ import pandas as pd
 
 from lib import utils
 from lib.database import GDRIVE_CLIENT, GSPREAD_CLIENT
-from lib.database import FX_NET_DB_TRADES_TABLE, FX_NET_DB_FILES_LOADED_TABLE 
+from lib.database import FX_NET_DB_TRADES_TABLE, FX_NET_DB_FILES_LOADED_TABLE
 from lib.app_selector import app_selector
 
 # Move to fx_net folder
+
+
 def fx_net_menu():
     '''
     TBD
@@ -30,15 +32,17 @@ def fx_net_menu():
         rprint("[bold underline]Main Menu\n")
 
         fx_net_menu_question = {
-        "Please select an option?": {
-        "Load FX Data to FX Net Database": load_fx_data,
-        "Reporting Menu": reporting_menu,
-        "Return to previous menu": return_to_previous_menu,
-        "Exit Program": utils.exit_message,
-        }}
+            "Please select an option?": {
+                "Load FX Data to FX Net Database": load_fx_data,
+                "Reporting Menu": reporting_menu,
+                "Return to previous menu": return_to_previous_menu,
+                "Exit Program": utils.exit_message,
+            }}
         utils.list_select_menu(fx_net_menu_question)
 
 # Move to fx_net folder
+
+
 def reporting_menu():
     '''
     TBD
@@ -53,32 +57,31 @@ def reporting_menu():
         rprint("Reporting / Analysis Menu\n")
 
         reporting_menu_question = {
-        "Please select an option?": {
-        "Netting Summary by Value Date": netting_summary_by_value_date,
-        "Create Netting Report by Value Date (WIP)": reporting_menu,
-        "Create payment files (WIP)": reporting_menu,
-        "Trade count by Client - All Trade Dates": trade_count_by_client,
-        "Trade count by Client - Trade Date Selector": trade_count_by_client_selector,
-        "Trade count by Client and Client Trader": trade_count_by_client_and_trader,
-        "Trade count by Bank Trader": trade_count_by_bank_trader,
-        "Return to FX Net Main Menu": fx_net_menu,
-        "Exit Program": utils.exit_message,
-        }}
+            "Please select an option?": {
+                "Netting Summary by Value Date": netting_summary_by_value_date,
+                "Create Netting Report by Value Date (WIP)": reporting_menu,
+                "Create payment files (WIP)": reporting_menu,
+                "Trade count by Client - All Trade Dates": trade_count_by_client,
+                "Trade count by Client - Trade Date Selector": trade_count_by_client_selector,
+                "Trade count by Client and Client Trader": trade_count_by_client_and_trader,
+                "Trade count by Bank Trader": trade_count_by_bank_trader,
+                "Return to FX Net Main Menu": fx_net_menu,
+                "Exit Program": utils.exit_message,
+            }}
         utils.list_select_menu(reporting_menu_question)
-
 
 
 def load_fx_data():
     '''
     This function first checks if the available files in the shared folder
     have already been loaded and returns a list of files that have not
-    been loaded into FX Net yet. 
-    It gives the user a prompt to select the file they wish to load, if there 
+    been loaded into FX Net yet.
+    It gives the user a prompt to select the file they wish to load, if there
     are no files available to load it informs the user and returns to the
-    menu. 
+    menu.
     Once the file is loaded, the file name, trade date and file id are
     added to the FILES_LOADED table, so it can be checked next time the
-    function is run. 
+    function is run.
 
     '''
     file_data = get_eligible_files_to_load()
@@ -103,7 +106,9 @@ def load_fx_data():
         rprint("[green]Data has been successfully loaded into FX Net database")
 
         file_trade_date = choice[-8:]
-        FX_NET_DB_FILES_LOADED_TABLE.append_row([choice, file_trade_date, chosen_file_id])
+        FX_NET_DB_FILES_LOADED_TABLE.append_row(
+            [choice, file_trade_date, chosen_file_id])
+
 
 def return_to_previous_menu():
     '''
@@ -115,11 +120,13 @@ def return_to_previous_menu():
     app_selector.run()
 
 # Move to fx_net folder (uses a client)
+
+
 def get_trade_data_files_list():
     '''
     This functions retrieves a list of trade data files from the database.
 
-    Returns: 
+    Returns:
         List of tuples containing file_name and file_id if files present.
         If no files present, returns empty list.
 
@@ -137,12 +144,13 @@ def get_trade_data_files_list():
         return trade_files
     else:
         for file in all_files:
-            if file_name_filter == None:
+            if file_name_filter is None:
                 trade_files.append((file['name'], file['id']))
             elif file["name"].startswith(file_name_filter):
                 trade_files.append((file['name'], file['id']))
 
     return trade_files
+
 
 def get_files_already_loaded():
     '''
@@ -154,16 +162,17 @@ def get_files_already_loaded():
     '''
 
     files_loaded = FX_NET_DB_FILES_LOADED_TABLE.get_all_values()
-    df = pd.DataFrame(files_loaded[1:],columns=files_loaded[0])
+    df = pd.DataFrame(files_loaded[1:], columns=files_loaded[0])
     file_ids_loaded = df['FILE_ID'].tolist()
 
     return file_ids_loaded
+
 
 def get_eligible_files_to_load():
     '''
     This function gets a list of already loaded file id's
     and compares it against a list (of tuples) of files available
-    to load and creates a list of files that haven't yet 
+    to load and creates a list of files that haven't yet
     been loaded into FX Net.
 
     Returns: List of eligible files to load
@@ -183,6 +192,8 @@ def get_eligible_files_to_load():
     return eligible_files
 
 # move to either utils or to fx_net folder (uses a client)
+
+
 def delete_file(file_id):
     '''
     TBD
@@ -195,12 +206,14 @@ def delete_file(file_id):
         print(f'Error deleting file: {e}')
 
 # move to either utils or to fx_net folder (uses a client)
+
+
 def get_file_list(file_name_filter=None):
     '''
     TBD
     '''
     list_of_files = []
-    if file_name_filter == None:
+    if file_name_filter is None:
         notification = "with no filter"
     else:
         notification = f'with filter of "{file_name_filter}"'
@@ -211,7 +224,7 @@ def get_file_list(file_name_filter=None):
         print('No files found in Google Drive.')
     else:
         for file in files:
-            if file_name_filter == None:
+            if file_name_filter is None:
                 print(f"{file['name']} ({file['id']})")
                 # list_of_files.append((file['name'], file['id']))
                 list_of_files.append((file['id']))
@@ -224,6 +237,8 @@ def get_file_list(file_name_filter=None):
     return list_of_files
 
 # move to fx_net folder (uses a client)
+
+
 def netting_summary_by_value_date():
     '''
     TBD
@@ -239,12 +254,16 @@ def netting_summary_by_value_date():
 
         os.system("clear")
         trades_data = FX_NET_DB_TRADES_TABLE.get_all_values()
-        df = pd.DataFrame(trades_data[1:],columns=trades_data[0])
+        df = pd.DataFrame(trades_data[1:], columns=trades_data[0])
         df = df[df["VALUE_DATE"] == date]
 
         trade_table = Table(title=f"\n\nFX Netting Data for {date}")
 
-        trade_table.add_column("Client", justify="center", style="green", no_wrap=True)
+        trade_table.add_column(
+            "Client",
+            justify="center",
+            style="green",
+            no_wrap=True)
         trade_table.add_column("CCY", justify="center", style="cyan")
         trade_table.add_column("Overall Net", justify="center", style="white")
         trade_table.add_column("Actions", justify="center", style="white")
@@ -259,11 +278,13 @@ def netting_summary_by_value_date():
 
         for client in unique_clients:
             for ccy in unique_all_ccys:
-                buy_col = df.query('CLIENT_NAME == @client and BUY_CCY == @ccy')
-                sell_col = df.query('CLIENT_NAME == @client and SELL_CCY == @ccy')
-                buy_sum = round(buy_col['BUY_AMT'].sum(),2)
-                sell_sum = round(sell_col['SELL_AMT'].sum(),2)
-                net = round(buy_sum + sell_sum,2)
+                buy_col = df.query(
+                    'CLIENT_NAME == @client and BUY_CCY == @ccy')
+                sell_col = df.query(
+                    'CLIENT_NAME == @client and SELL_CCY == @ccy')
+                buy_sum = round(buy_col['BUY_AMT'].sum(), 2)
+                sell_sum = round(sell_col['SELL_AMT'].sum(), 2)
+                net = round(buy_sum + sell_sum, 2)
 
                 if net < 0:
                     action = f"pay {ccy}"
@@ -272,7 +293,7 @@ def netting_summary_by_value_date():
 
                 trade_table.add_row(client,
                                     ccy,
-                                    "{:,.2f}".format(net), 
+                                    "{:,.2f}".format(net),
                                     action)
 
         console = Console()
@@ -282,19 +303,23 @@ def netting_summary_by_value_date():
         input("Press Enter to continue")
 
 # move to fx_net folder (uses a client)
+
+
 def get_most_recent_file():
     '''
     TBD
     '''
     trades_data = FX_NET_DB_TRADES_TABLE.get_all_values()
-    df = pd.DataFrame(trades_data[1:],columns=trades_data[0])
+    df = pd.DataFrame(trades_data[1:], columns=trades_data[0])
     unique_value_dates = df['VALUE_DATE'].unique()
     return unique_value_dates[-1]
 
 # move to fx_net folder (uses a client)
+
+
 def create_report_spreadsheet(value_date):
     """
-    Creates the new file, saves it in google drive and returns 
+    Creates the new file, saves it in google drive and returns
     the file id
     """
 
@@ -312,11 +337,12 @@ def create_report_spreadsheet(value_date):
         }
 
         new_file = GDRIVE_CLIENT.files().create(body=new_file_metadata).execute()
-        GDRIVE_CLIENT.permissions().create(fileId=new_file['id'],body=permissions).execute()
+        GDRIVE_CLIENT.permissions().create(
+            fileId=new_file['id'], body=permissions).execute()
         print(f'File created with ID: {new_file["id"]}')
 
         trades_data = FX_NET_DB_TRADES_TABLE.get_all_values()
-        df = pd.DataFrame(trades_data[1:],columns=trades_data[0])
+        df = pd.DataFrame(trades_data[1:], columns=trades_data[0])
         data = df[df['VALUE_DATE'] == value_date]
         # print(data)
         # print(type(data))
@@ -325,25 +351,29 @@ def create_report_spreadsheet(value_date):
 
         workbook = GSPREAD_CLIENT.open_by_key(new_file["id"])
         data_sheet = workbook.add_worksheet(title="Data", rows=100, cols=20)
-        data_sheet.update_cell(1,1, f'Netting Report for Value Date {value_date}')
+        data_sheet.update_cell(
+            1, 1, f'Netting Report for Value Date {value_date}')
         workbook.del_worksheet(workbook.sheet1)
         data_sheet.append_row(headings)
         data_sheet.append_rows(list_of_data)
 
-        breakdown_sheet = workbook.add_worksheet(title="Netting Breakdown", rows=100, cols=20)
+        breakdown_sheet = workbook.add_worksheet(
+            title="Netting Breakdown", rows=100, cols=20)
 
-        breakdown_sheet.update_cell(1,1, f'Netting Report for Value Date {value_date}')
+        breakdown_sheet.update_cell(
+            1, 1, f'Netting Report for Value Date {value_date}')
 
         # Add code for the format of the netting report here
     except Exception as e:
         print(f'Error creating new file: {e}')
 
     return new_file["id"]
-    
+
+
 def trade_count_by_client(trade_date_filter=False):
     os.system("clear")
     trades_data = FX_NET_DB_TRADES_TABLE.get_all_values()
-    df = pd.DataFrame(trades_data[1:],columns=trades_data[0])
+    df = pd.DataFrame(trades_data[1:], columns=trades_data[0])
 
     dates = get_available_report_dates_by_type("trade")
     date = "All Trade Dates"
@@ -360,7 +390,10 @@ def trade_count_by_client(trade_date_filter=False):
 
         table = Table(title=f"\n\nTrade Count by Client - {date}")
         table.add_column("Client Name", justify="center", style="white")
-        table.add_column("Count of Trades Booked", justify="center", style="white")
+        table.add_column(
+            "Count of Trades Booked",
+            justify="center",
+            style="white")
 
         for client, count_of_trades in client_trade_counts:
             table.add_row(client, str(count_of_trades))
@@ -370,12 +403,14 @@ def trade_count_by_client(trade_date_filter=False):
         rprint("[cyan]Scroll to see full table if required")
         input("Press Enter to continue")
 
+
 def trade_count_by_client_selector():
     trade_count_by_client(True)
 
+
 def get_available_report_dates_by_type(value_or_trade):
     '''
-    Helper function to pull out all available dates by type 
+    Helper function to pull out all available dates by type
     from the TRADES table.
 
     Parameters: Either trade or value passed in as a string
@@ -388,7 +423,7 @@ def get_available_report_dates_by_type(value_or_trade):
         date_type = "TRADE_DATE"
 
     all_data = FX_NET_DB_TRADES_TABLE.get_all_values()
-    df = pd.DataFrame(all_data[1:],columns=all_data[0])
+    df = pd.DataFrame(all_data[1:], columns=all_data[0])
 
     value_dates = df[date_type].unique()
     if len(value_dates) > 0:
@@ -396,12 +431,14 @@ def get_available_report_dates_by_type(value_or_trade):
     else:
         return []
 
+
 def trade_count_by_client_and_trader(trade_date_filter=None):
     os.system("clear")
     trades_data = FX_NET_DB_TRADES_TABLE.get_all_values()
-    df = pd.DataFrame(trades_data[1:],columns=trades_data[0])
+    df = pd.DataFrame(trades_data[1:], columns=trades_data[0])
 
-    client_trade_counts = dict(df.groupby(["CLIENT_NAME", "CLIENT_TRADER"])["CLIENT_TRADER"].count())
+    client_trade_counts = dict(df.groupby(["CLIENT_NAME", "CLIENT_TRADER"])[
+                               "CLIENT_TRADER"].count())
 
     table = Table(title=f"\n\nTrades booked by Client Trader")
     table.add_column("Client Name", justify="center", style="white")
@@ -417,10 +454,11 @@ def trade_count_by_client_and_trader(trade_date_filter=None):
     rprint("[cyan]Scroll to see full table if required")
     input("Press Enter to continue")
 
+
 def trade_count_by_bank_trader(trade_date_filter=None):
     os.system("clear")
     trades_data = FX_NET_DB_TRADES_TABLE.get_all_values()
-    df = pd.DataFrame(trades_data[1:],columns=trades_data[0])
+    df = pd.DataFrame(trades_data[1:], columns=trades_data[0])
 
     bank_trader_trade_counts = list(df['BANK_TRADER'].value_counts().items())
 
@@ -435,4 +473,3 @@ def trade_count_by_bank_trader(trade_date_filter=None):
 
     rprint("[cyan]Scroll to see full table if required")
     input("Press Enter to continue")
-

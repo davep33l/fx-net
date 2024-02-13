@@ -20,14 +20,13 @@ if __name__ == "__main__":
     # get_files_already_loaded()
     # file_data = get_eligible_files_to_load()
     # file_names = [file_name[0] for file_name in file_data]
-    
+
     # choice = menus.menu("Pick a file to load", file_names)
     # print(choice)
 
     # for file in file_data:
     #     if file[0] == choice:
     #         file_id = file[1]
-
 
     # print(file_id)
 

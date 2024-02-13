@@ -2,7 +2,7 @@
 This module serves as an orchestration menu to select the relevant
 application you wish to run.
 '''
-#Build in imports
+# Build in imports
 import os
 
 from rich import print as rprint
@@ -11,6 +11,7 @@ from rich import print as rprint
 from ..trading_simulator.trading_simulator import trading_sim_menu
 from ..fx_net.fx_net import fx_net_menu
 from ..utils import exit_message, list_select_menu
+
 
 def run():
     '''
@@ -23,9 +24,9 @@ def run():
         rprint("[cyan]--- APP SELECTOR ---\n")
         rprint("[bold underline]Main Menu\n")
         app_selector_question = {
-                "Please select an option?": {
+            "Please select an option?": {
                 "Trading Simulator": trading_sim_menu,
                 "FX Net": fx_net_menu,
                 "Exit": exit_message,
-                }}
+            }}
         list_select_menu(app_selector_question)
