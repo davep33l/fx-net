@@ -59,7 +59,7 @@ def reporting_menu():
         reporting_menu_question = {
             "Please select an option?": {
                 "Netting Summary by Value Date": netting_summary_by_value_date,
-                "Create Netting Report by Value Date (WIP)": create_netting_report_by_value_date,
+                "Create Netting Report by Value Date": create_netting_report_by_value_date,
                 "Create payment files (WIP)": reporting_menu,
                 "Trade count by Client - All Trade Dates": trade_count_by_client,
                 "Trade count by Client - Trade Date Selector": trade_count_by_client_selector,
@@ -320,11 +320,12 @@ def get_most_recent_file():
 def create_netting_report_by_value_date():
     """
     Creates the new file, saves it in google drive and returns
-    the file id
+    the shareable link
     """
     os.system("clear")
     trades_data = FX_NET_DB_TRADES_TABLE.get_all_values()
     df = pd.DataFrame(trades_data[1:], columns=trades_data[0])
+
     dates = get_available_report_dates_by_type("value")
 
     if len(dates) == 0:
@@ -334,10 +335,7 @@ def create_netting_report_by_value_date():
     else:
         date = utils.fuzzy_select_menu("Please select a date", dates)
         df = df[df['VALUE_DATE'] == date]
-
-        # print("Creating Report for value", date)
-        # print(df)
-        # input("Press Enter to continue")
+        print("Creating Report for value", date)
 
         try:
             # Create a new file
@@ -357,33 +355,71 @@ def create_netting_report_by_value_date():
                 fileId=new_file['id'], body=permissions).execute()
             print(f'File created with ID: {new_file["id"]}')
 
-            # trades_data = FX_NET_DB_TRADES_TABLE.get_all_values()
-            # df = pd.DataFrame(trades_data[1:], columns=trades_data[0])
-            # data = df[df['VALUE_DATE'] == date]
-            # print(data)
-            # print(type(data))
             headings = df.columns.tolist()
             list_of_data = df.values.tolist()
 
             workbook = GSPREAD_CLIENT.open_by_key(new_file["id"])
             data_sheet = workbook.add_worksheet(title="Data", rows=100, cols=20)
+
+            rprint("[green]Adding supporting trade data")
+
             data_sheet.update_cell(
                 1, 1, f'Netting Report for Value Date {date}')
             workbook.del_worksheet(workbook.sheet1)
             data_sheet.append_row(headings)
             data_sheet.append_rows(list_of_data)
 
+            rprint("[green]Adding breakdown data")
+
             breakdown_sheet = workbook.add_worksheet(
                 title="Netting Breakdown", rows=100, cols=20)
 
             breakdown_sheet.update_cell(
                 1, 1, f'Netting Report for Value Date {date}')
+            
+            breakdown_sheet.append_row(["Client", "CCY", "Overall Net", "Actions"])
+            netting_data = []
 
-            # Add code for the format of the netting report here
+            df['BUY_AMT'] = pd.to_numeric(df['BUY_AMT'], errors='coerce')
+            df['SELL_AMT'] = pd.to_numeric(df['SELL_AMT'], errors='coerce')
+
+            unique_clients = df['CLIENT_NAME'].unique()
+            unique_buy_ccys = list(df["BUY_CCY"].unique())
+            unique_sell_ccys = list(df['SELL_CCY'].unique())
+            unique_all_ccys = sorted(set(unique_buy_ccys + unique_sell_ccys))
+
+            for client in unique_clients:
+                for ccy in unique_all_ccys:
+                    buy_col = df.query(
+                        'CLIENT_NAME == @client and BUY_CCY == @ccy')
+                    sell_col = df.query(
+                        'CLIENT_NAME == @client and SELL_CCY == @ccy')
+                    buy_sum = round(buy_col['BUY_AMT'].sum(), 2)
+                    sell_sum = round(sell_col['SELL_AMT'].sum(), 2)
+                    net = round(buy_sum + sell_sum, 2)
+
+                    if net < 0:
+                        action = f"Pay {ccy}"
+                    else:
+                        action = f"Receive {ccy}"
+
+                    netting_data.append([client,
+                                            ccy,
+                                            "{:,.2f}".format(net),
+                                            action])
+            
+            breakdown_sheet.append_rows(netting_data)
+            rprint("[green]Data populated to file")
+            time.sleep(2)
+
+            file_data = GDRIVE_CLIENT.files().get(fileId=new_file['id'], fields='webViewLink').execute()
+            file_shareable_link = list(file_data.values())[0]
+            rprint(f'[cyan]You can see your generated report here: {file_shareable_link}')
+
+            input("Press Enter to continue")
+
         except Exception as e:
             print(f'Error creating new file: {e}')
-
-        
 
 
 def trade_count_by_client(trade_date_filter=False):
