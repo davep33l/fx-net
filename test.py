@@ -123,7 +123,7 @@ from rich import print as rprint
 from rich.console import Console
 from rich.table import Table
 
-from lib.database import FX_NET_DB_TRADES_TABLE
+from lib.database import FX_NET_DB_TRADES_TABLE, GDRIVE_CLIENT, GSPREAD_CLIENT
 from lib import utils
 
 
@@ -210,4 +210,106 @@ def get_available_report_dates_by_type(value_or_trade):
         return []
 
 
-trade_count_by_client()
+def create_netting_report_by_value_date():
+    """
+    Creates the new file, saves it in google drive and returns
+    the file id
+    """
+    os.system("clear")
+    trades_data = FX_NET_DB_TRADES_TABLE.get_all_values()
+    df = pd.DataFrame(trades_data[1:], columns=trades_data[0])
+    
+
+    dates = get_available_report_dates_by_type("value")
+
+    if len(dates) == 0:
+        rprint("[red]No data stored in FX Net Database")
+        rprint("[red]Please load data or select another option")
+        time.sleep(2)
+    else:
+        date = utils.fuzzy_select_menu("Please select a date", dates)
+        df = df[df['VALUE_DATE'] == date]
+        print("Creating Report for value", date)
+
+        try:
+            # Create a new file
+            new_file_metadata = {
+                'name': f'netting_report_vd_{date}',
+                'mimeType': 'application/vnd.google-apps.spreadsheet',
+            }
+
+            permissions = {
+                'type': 'user',
+                'role': 'writer',
+                'emailAddress': 'davidpeel.test1@gmail.com',
+            }
+
+            new_file = GDRIVE_CLIENT.files().create(body=new_file_metadata).execute()
+            GDRIVE_CLIENT.permissions().create(
+                fileId=new_file['id'], body=permissions).execute()
+            print(f'File created with ID: {new_file["id"]}')
+
+            headings = df.columns.tolist()
+            list_of_data = df.values.tolist()
+
+
+            workbook = GSPREAD_CLIENT.open_by_key(new_file["id"])
+            data_sheet = workbook.add_worksheet(title="Data", rows=100, cols=20)
+
+            rprint("[green]Adding supporting trade data")
+
+            data_sheet.update_cell(
+                1, 1, f'Netting Report for Value Date {date}')
+            workbook.del_worksheet(workbook.sheet1)
+            data_sheet.append_row(headings)
+            data_sheet.append_rows(list_of_data)
+
+
+            rprint("[green]Adding breakdown data")
+
+
+            breakdown_sheet = workbook.add_worksheet(
+                title="Netting Breakdown", rows=100, cols=20)
+
+            breakdown_sheet.update_cell(
+                1, 1, f'Netting Report for Value Date {date}')
+            
+            breakdown_sheet.append_row(["Client", "CCY", "Overall Net", "Actions"])
+            netting_data = []
+
+            df['BUY_AMT'] = pd.to_numeric(df['BUY_AMT'], errors='coerce')
+            df['SELL_AMT'] = pd.to_numeric(df['SELL_AMT'], errors='coerce')
+
+            unique_clients = df['CLIENT_NAME'].unique()
+            unique_buy_ccys = list(df["BUY_CCY"].unique())
+            unique_sell_ccys = list(df['SELL_CCY'].unique())
+            unique_all_ccys = sorted(set(unique_buy_ccys + unique_sell_ccys))
+
+            for client in unique_clients:
+                for ccy in unique_all_ccys:
+                    buy_col = df.query(
+                        'CLIENT_NAME == @client and BUY_CCY == @ccy')
+                    sell_col = df.query(
+                        'CLIENT_NAME == @client and SELL_CCY == @ccy')
+                    buy_sum = round(buy_col['BUY_AMT'].sum(), 2)
+                    sell_sum = round(sell_col['SELL_AMT'].sum(), 2)
+                    net = round(buy_sum + sell_sum, 2)
+
+                    if net < 0:
+                        action = f"Pay {ccy}"
+                    else:
+                        action = f"Receive {ccy}"
+
+                    netting_data.append([client,
+                                            ccy,
+                                            "{:,.2f}".format(net),
+                                            action])
+            
+            breakdown_sheet.append_rows(netting_data)
+            rprint("[green]Data populated to file")
+            time.sleep(2)
+
+        except Exception as e:
+            print(f'Error creating new file: {e}')
+
+create_netting_report_by_value_date()
