@@ -12,6 +12,7 @@ import pandas as pd
 from lib import utils
 from lib.database import GDRIVE_CLIENT, GSPREAD_CLIENT
 from lib.database import FX_NET_DB_TRADES_TABLE, FX_NET_DB_FILES_LOADED_TABLE
+from lib.database import FX_NET_DB_PAYMENTS_INX_TABLE
 from lib.app_selector import app_selector
 
 # Move to fx_net folder
@@ -60,7 +61,7 @@ def reporting_menu():
             "Please select an option?": {
                 "Netting Summary by Value Date": netting_summary_by_value_date,
                 "Create Netting Report by Value Date": create_netting_report_by_value_date,
-                "Create payment files (WIP)": reporting_menu,
+                "Create payment files (WIP)": create_payment_files,
                 "Trade count by Client - All Trade Dates": trade_count_by_client,
                 "Trade count by Client - Trade Date Selector": trade_count_by_client_selector,
                 "Trade count by Client and Client Trader": trade_count_by_client_and_trader,
@@ -525,3 +526,87 @@ def trade_count_by_bank_trader(trade_date_filter=None):
 
     rprint("[cyan]Scroll to see full table if required")
     input("Press Enter to continue")
+
+def create_payment_files():
+    
+    os.system("clear")
+    trades_data = FX_NET_DB_TRADES_TABLE.get_all_values()
+    df = pd.DataFrame(trades_data[1:], columns=trades_data[0])
+
+    dates = get_available_report_dates_by_type("value")
+
+    if len(dates) == 0:
+        rprint("[red]No data stored in FX Net Database")
+        rprint("[red]Please load data or select another option")
+        time.sleep(2)
+    else:
+        date = utils.fuzzy_select_menu("Please select a date", dates)
+        df = df[df['VALUE_DATE'] == date]
+        print("Creating Report for value", date)
+    
+        try:
+            # Create a new file
+            new_file_metadata = {
+                'name': f'payment_report_vd_{date}',
+                'mimeType': 'application/vnd.google-apps.spreadsheet',
+            }
+
+            permissions = {
+                'type': 'user',
+                'role': 'writer',
+                'emailAddress': 'davidpeel.test1@gmail.com',
+            }
+
+
+            new_file = GDRIVE_CLIENT.files().create(body=new_file_metadata).execute()
+            GDRIVE_CLIENT.permissions().create(
+                fileId=new_file['id'], body=permissions).execute()
+            print(f'File created with ID: {new_file["id"]}')
+
+            workbook = GSPREAD_CLIENT.open_by_key(new_file["id"])
+            breakdown_sheet = workbook.add_worksheet(title="Payment Report", rows=100, cols=20)
+
+            breakdown_sheet.update_cell(
+                1, 1, f'Payment Report for Value Date {date}')
+            workbook.del_worksheet(workbook.sheet1)
+
+            breakdown_sheet.append_row(["Client", "CCY", "Overall Net", "Actions"])
+            netting_data = []
+
+            df['BUY_AMT'] = pd.to_numeric(df['BUY_AMT'], errors='coerce')
+            df['SELL_AMT'] = pd.to_numeric(df['SELL_AMT'], errors='coerce')
+
+            unique_clients = df['CLIENT_NAME'].unique()
+            unique_buy_ccys = list(df["BUY_CCY"].unique())
+            unique_sell_ccys = list(df['SELL_CCY'].unique())
+            unique_all_ccys = sorted(set(unique_buy_ccys + unique_sell_ccys))
+
+            for client in unique_clients:
+                for ccy in unique_all_ccys:
+                    buy_col = df.query(
+                        'CLIENT_NAME == @client and BUY_CCY == @ccy')
+                    sell_col = df.query(
+                        'CLIENT_NAME == @client and SELL_CCY == @ccy')
+                    buy_sum = round(buy_col['BUY_AMT'].sum(), 2)
+                    sell_sum = round(sell_col['SELL_AMT'].sum(), 2)
+                    net = round(buy_sum + sell_sum, 2)
+
+                    if net < 0:
+                        action = f"Pay {ccy}"
+                    else:
+                        action = f"Receive {ccy}"
+
+                    netting_data.append([client,
+                                            ccy,
+                                            "{:,.2f}".format(net),
+                                            action])
+            
+            breakdown_sheet.append_rows(netting_data)
+
+            payment_inx = FX_NET_DB_PAYMENTS_INX_TABLE.get_all_values()
+            print(payment_inx)
+
+            input("Press Enter to continue")
+
+        except Exception as e:
+            print(f'Error creating new file: {e}')

@@ -8,6 +8,8 @@ FX_NET_DB = GSPREAD_CLIENT.open('fx_net_db')
 # FX Net table connections
 FX_NET_DB_TRADES_TABLE = FX_NET_DB.worksheet("TRADES")
 FX_NET_DB_FILES_LOADED_TABLE = FX_NET_DB.worksheet("FILES_LOADED")
+FX_NET_DB_PAYMENTS_INX_TABLE = FX_NET_DB.worksheet("PAYMENT_INX")
+
 
 # Trading Simulator connection
 TRADING_SIMULATOR_DB = GSPREAD_CLIENT.open('trading_simulator_db')
