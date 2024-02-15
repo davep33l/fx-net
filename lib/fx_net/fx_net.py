@@ -61,7 +61,7 @@ def reporting_menu():
             "Please select an option?": {
                 "Netting Summary by Value Date": netting_summary_by_value_date,
                 "Create Netting Report by Value Date": create_netting_report_by_value_date,
-                "Create payment files (WIP)": create_payment_files,
+                "Create payment files": create_payment_files,
                 "Trade count by Client - All Trade Dates": trade_count_by_client,
                 "Trade count by Client - Trade Date Selector": trade_count_by_client_selector,
                 "Trade count by Client and Client Trader": trade_count_by_client_and_trader,
@@ -565,12 +565,9 @@ def create_payment_files():
 
             workbook = GSPREAD_CLIENT.open_by_key(new_file["id"])
             breakdown_sheet = workbook.add_worksheet(title="Payment Report", rows=100, cols=20)
-
-            breakdown_sheet.update_cell(
-                1, 1, f'Payment Report for Value Date {date}')
             workbook.del_worksheet(workbook.sheet1)
 
-            breakdown_sheet.append_row(["Client", "CCY", "Overall Net", "Actions"])
+            # breakdown_sheet.append_row(["Client", "CCY", "OVERALL_NET", "ACTIONS"])
             netting_data = []
 
             df['BUY_AMT'] = pd.to_numeric(df['BUY_AMT'], errors='coerce')
@@ -600,13 +597,29 @@ def create_payment_files():
                                             ccy,
                                             "{:,.2f}".format(net),
                                             action])
-            
-            breakdown_sheet.append_rows(netting_data)
 
-            print(netting_data)
+            netting_df = pd.DataFrame(netting_data[:], columns=["CLIENT_NAME", "CCY", "OVERALL_NET", "ACTIONS"])
+            netting_df['OVERALL_NET'] = pd.to_numeric(netting_df['OVERALL_NET'].str.replace(',', ''), errors='coerce')
+
+            netting_df.drop('ACTIONS', axis='columns', inplace=True)
 
             payment_inx = FX_NET_DB_PAYMENTS_INX_TABLE.get_all_values()
-            print(payment_inx)
+            pmt_df = pd.DataFrame(payment_inx[1:], columns=payment_inx[0])
+
+            result = pd.merge(netting_df, pmt_df, on=['CLIENT_NAME', 'CCY'], how='inner')
+
+            only_payments = result.loc[result['OVERALL_NET'] < 0]
+
+            data_for_gspread = only_payments.values.tolist()
+
+            breakdown_sheet.append_rows(data_for_gspread)
+
+            rprint("[green]Data populated to file")
+            time.sleep(2)
+
+            file_data = GDRIVE_CLIENT.files().get(fileId=new_file['id'], fields='webViewLink').execute()
+            file_shareable_link = list(file_data.values())[0]
+            rprint(f'[cyan]You can see your generated report here: {file_shareable_link}')
 
             input("Press Enter to continue")
 
