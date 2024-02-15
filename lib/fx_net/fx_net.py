@@ -603,6 +603,8 @@ def create_payment_files():
             
             breakdown_sheet.append_rows(netting_data)
 
+            print(netting_data)
+
             payment_inx = FX_NET_DB_PAYMENTS_INX_TABLE.get_all_values()
             print(payment_inx)
 
