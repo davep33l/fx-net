@@ -78,6 +78,10 @@ def fuzzy_select_menu(message, choices):
 
     return result
 
+def no_data_message():
+    rprint("[red]No data stored in FX Net Database")
+    rprint("[red]Please load data or select another option")
+    time.sleep(2)
 
 def get_google_clients():
     """

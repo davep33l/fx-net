@@ -15,12 +15,14 @@ from lib.database import FX_NET_DB_TRADES_TABLE, FX_NET_DB_FILES_LOADED_TABLE
 from lib.database import FX_NET_DB_PAYMENTS_INX_TABLE
 from lib.app_selector import app_selector
 
-# Move to fx_net folder
-
 
 def fx_net_menu():
     '''
-    TBD
+    Shows the menu options for the FX Net Application.
+
+    Uses list_select_menu from utils to show a list based selection
+    menu to the user on the console.
+
     '''
     rprint("[green]Opening the FX Net Application")
     utils.please_wait()
@@ -41,12 +43,15 @@ def fx_net_menu():
             }}
         utils.list_select_menu(fx_net_menu_question)
 
-# Move to fx_net folder
-
 
 def reporting_menu():
     '''
-    TBD
+    Shows the menu options for the Reporting section of
+    the FX Net Application.
+
+    Uses list_select_menu from utils to show a list based selection
+    menu to the user on the console.
+
     '''
 
     rprint("[green]Opening Reporting Menu")
@@ -239,17 +244,15 @@ def get_file_list(file_name_filter=None):
 
 # move to fx_net folder (uses a client)
 
-
 def netting_summary_by_value_date():
     '''
     TBD
     '''
+    os.system("clear")
     dates = get_available_report_dates_by_type("value")
 
     if len(dates) == 0:
-        rprint("[red]No data stored in FX Net Database")
-        rprint("[red]Please load data or select another option")
-        time.sleep(2)
+        utils.no_data_message()
     else:
         date = utils.fuzzy_select_menu("Type or select a date: ", dates)
 
@@ -352,7 +355,8 @@ def create_netting_report_by_value_date():
             list_of_data = df.values.tolist()
 
             workbook = GSPREAD_CLIENT.open_by_key(new_file["id"])
-            data_sheet = workbook.add_worksheet(title="Data", rows=100, cols=20)
+            data_sheet = workbook.add_worksheet(
+                title="Data", rows=100, cols=20)
 
             rprint("[green]Adding supporting trade data")
 
@@ -369,8 +373,9 @@ def create_netting_report_by_value_date():
 
             breakdown_sheet.update_cell(
                 1, 1, f'Netting Report for Value Date {date}')
-            
-            breakdown_sheet.append_row(["Client", "CCY", "Overall Net", "Actions"])
+
+            breakdown_sheet.append_row(
+                ["Client", "CCY", "Overall Net", "Actions"])
             netting_data = []
 
             df['BUY_AMT'] = pd.to_numeric(df['BUY_AMT'], errors='coerce')
@@ -397,15 +402,15 @@ def create_netting_report_by_value_date():
                         action = f"Receive {ccy}"
 
                     netting_data.append([client,
-                                            ccy,
-                                            "{:,.2f}".format(net),
-                                            action])
-            
+                                         ccy,
+                                         "{:,.2f}".format(net),
+                                         action])
+
             breakdown_sheet.append_rows(netting_data)
             rprint("[green]Data populated to file")
             time.sleep(2)
 
-            create_link_menu(new_file)          
+            create_link_menu(new_file)
 
         except Exception as e:
             print(f'Error creating new file: {e}')
@@ -419,9 +424,7 @@ def trade_count_by_client(trade_date_filter=False):
     dates = get_available_report_dates_by_type("trade")
     date = "All Trade Dates"
     if len(dates) == 0:
-        rprint("[red]No data stored in FX Net Database")
-        rprint("[red]Please load data or select another option")
-        time.sleep(2)
+        utils.no_data_message()
     else:
         if trade_date_filter:
             date = utils.fuzzy_select_menu("Please select a date", dates)
@@ -473,50 +476,61 @@ def get_available_report_dates_by_type(value_or_trade):
         return []
 
 
-def trade_count_by_client_and_trader(trade_date_filter=None):
+def trade_count_by_client_and_trader():
     os.system("clear")
-    trades_data = FX_NET_DB_TRADES_TABLE.get_all_values()
-    df = pd.DataFrame(trades_data[1:], columns=trades_data[0])
 
-    client_trade_counts = dict(df.groupby(["CLIENT_NAME", "CLIENT_TRADER"])[
-                               "CLIENT_TRADER"].count())
+    dates = get_available_report_dates_by_type("trade")
+    if len(dates) == 0:
+        utils.no_data_message()
+    else:
+        trades_data = FX_NET_DB_TRADES_TABLE.get_all_values()
+        df = pd.DataFrame(trades_data[1:], columns=trades_data[0])
 
-    table = Table(title=f"\n\nTrades booked by Client Trader")
-    table.add_column("Client Name", justify="center", style="white")
-    table.add_column("Client Client Trader", justify="center", style="white")
-    table.add_column("Count of Trades Booked", justify="center", style="white")
+        client_trade_counts = dict(df.groupby(["CLIENT_NAME", "CLIENT_TRADER"])[
+                                "CLIENT_TRADER"].count())
 
-    for (client, trader), client_trade_counts in client_trade_counts.items():
-        table.add_row(client, trader, str(client_trade_counts))
+        table = Table(title=f"\n\nTrades booked by Client Trader")
+        table.add_column("Client Name", justify="center", style="white")
+        table.add_column("Client Client Trader", justify="center", style="white")
+        table.add_column("Count of Trades Booked", justify="center", style="white")
 
-    console = Console()
-    console.print(table)
+        for (client, trader), client_trade_counts in client_trade_counts.items():
+            table.add_row(client, trader, str(client_trade_counts))
 
-    rprint("[cyan]Scroll to see full table if required")
-    input("Press Enter to continue")
+        console = Console()
+        console.print(table)
+
+        rprint("[cyan]Scroll to see full table if required")
+        input("Press Enter to continue")
 
 
-def trade_count_by_bank_trader(trade_date_filter=None):
+def trade_count_by_bank_trader():
     os.system("clear")
-    trades_data = FX_NET_DB_TRADES_TABLE.get_all_values()
-    df = pd.DataFrame(trades_data[1:], columns=trades_data[0])
 
-    bank_trader_trade_counts = list(df['BANK_TRADER'].value_counts().items())
+    dates = get_available_report_dates_by_type("trade")
+    if len(dates) == 0:
+        utils.no_data_message()
+    else:
+        trades_data = FX_NET_DB_TRADES_TABLE.get_all_values()
+        df = pd.DataFrame(trades_data[1:], columns=trades_data[0])
 
-    table = Table(title=f"\n\nTrade Count by Bank Trader")
-    table.add_column("Bank Trader Name", justify="center", style="white")
-    table.add_column("Count of Trades Booked", justify="center", style="white")
+        bank_trader_trade_counts = list(df['BANK_TRADER'].value_counts().items())
 
-    for client, count_of_trades in bank_trader_trade_counts:
-        table.add_row(client, str(count_of_trades))
-    console = Console()
-    console.print(table)
+        table = Table(title=f"\n\nTrade Count by Bank Trader")
+        table.add_column("Bank Trader Name", justify="center", style="white")
+        table.add_column("Count of Trades Booked", justify="center", style="white")
 
-    rprint("[cyan]Scroll to see full table if required")
-    input("Press Enter to continue")
+        for client, count_of_trades in bank_trader_trade_counts:
+            table.add_row(client, str(count_of_trades))
+        console = Console()
+        console.print(table)
+
+        rprint("[cyan]Scroll to see full table if required")
+        input("Press Enter to continue")
+
 
 def create_payment_files():
-    
+
     os.system("clear")
     trades_data = FX_NET_DB_TRADES_TABLE.get_all_values()
     df = pd.DataFrame(trades_data[1:], columns=trades_data[0])
@@ -524,14 +538,12 @@ def create_payment_files():
     dates = get_available_report_dates_by_type("value")
 
     if len(dates) == 0:
-        rprint("[red]No data stored in FX Net Database")
-        rprint("[red]Please load data or select another option")
-        time.sleep(2)
+        utils.no_data_message()
     else:
         date = utils.fuzzy_select_menu("Please select a date", dates)
         df = df[df['VALUE_DATE'] == date]
         print("Creating Report for value", date)
-    
+
         try:
             # Create a new file
             new_file_metadata = {
@@ -543,7 +555,8 @@ def create_payment_files():
             print(f'File created with ID: {new_file["id"]}')
 
             workbook = GSPREAD_CLIENT.open_by_key(new_file["id"])
-            breakdown_sheet = workbook.add_worksheet(title="Payment Report", rows=100, cols=20)
+            breakdown_sheet = workbook.add_worksheet(
+                title="Payment Report", rows=100, cols=20)
             workbook.del_worksheet(workbook.sheet1)
 
             netting_data = []
@@ -572,19 +585,29 @@ def create_payment_files():
                         action = f"Receive {ccy}"
 
                     netting_data.append([client,
-                                            ccy,
-                                            "{:,.2f}".format(net),
-                                            action])
+                                         ccy,
+                                         "{:,.2f}".format(net),
+                                         action])
 
-            netting_df = pd.DataFrame(netting_data[:], columns=["CLIENT_NAME", "CCY", "OVERALL_NET", "ACTIONS"])
-            netting_df['OVERALL_NET'] = pd.to_numeric(netting_df['OVERALL_NET'].str.replace(',', ''), errors='coerce')
+            netting_df = pd.DataFrame(
+                netting_data[:],
+                columns=[
+                    "CLIENT_NAME",
+                    "CCY",
+                    "OVERALL_NET",
+                    "ACTIONS"])
+            netting_df['OVERALL_NET'] = pd.to_numeric(
+                netting_df['OVERALL_NET'].str.replace(
+                    ',', ''), errors='coerce')
 
             netting_df.drop('ACTIONS', axis='columns', inplace=True)
 
             payment_inx = FX_NET_DB_PAYMENTS_INX_TABLE.get_all_values()
             pmt_df = pd.DataFrame(payment_inx[1:], columns=payment_inx[0])
 
-            result = pd.merge(netting_df, pmt_df, on=['CLIENT_NAME', 'CCY'], how='inner')
+            result = pd.merge(
+                netting_df, pmt_df, on=[
+                    'CLIENT_NAME', 'CCY'], how='inner')
 
             only_payments = result.loc[result['OVERALL_NET'] < 0]
 
@@ -600,22 +623,27 @@ def create_payment_files():
         except Exception as e:
             print(f'Error creating new file: {e}')
 
+
 def create_shareable_link(file_object):
-    
+
     # Gives access to the file for anyone with the link
     permissions = {
-    'type': 'anyone',
-    'role': 'reader',
-}
+        'type': 'anyone',
+        'role': 'reader',
+    }
     GDRIVE_CLIENT.permissions().create(
-    fileId=file_object['id'], body=permissions).execute()
-    
-    file_data = GDRIVE_CLIENT.files().get(fileId=file_object['id'], fields='webViewLink').execute()
+        fileId=file_object['id'], body=permissions).execute()
+
+    file_data = GDRIVE_CLIENT.files().get(
+        fileId=file_object['id'],
+        fields='webViewLink').execute()
     file_shareable_link = list(file_data.values())[0]
     rprint('[red]Either use mouse context menu to copy or ctrl+insert(windows) or cmd+insert(mac)')
-    rprint(f'[cyan]You can see your generated report here: {file_shareable_link}')
+    rprint(
+        f'[cyan]You can see your generated report here: {file_shareable_link}')
 
     input("Press Enter to continue")
+
 
 def create_link_menu(file_id):
     response = input("Do you want a link for the file. Press Y and enter: ")
@@ -626,4 +654,4 @@ def create_link_menu(file_id):
         create_shareable_link(file_id)
     else:
         print("Invalid option, no link created")
-        time.sleep(2)  
+        time.sleep(2)
