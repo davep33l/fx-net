@@ -612,7 +612,7 @@ def create_shareable_link(file_object):
     
     file_data = GDRIVE_CLIENT.files().get(fileId=file_object['id'], fields='webViewLink').execute()
     file_shareable_link = list(file_data.values())[0]
-    rprint('[red]Please use your mouse to highlight the link and right click to copy')
+    rprint('[red]Either use mouse context menu to copy or ctrl+insert(windows) or cmd+insert(mac)')
     rprint(f'[cyan]You can see your generated report here: {file_shareable_link}')
 
     input("Press Enter to continue")
