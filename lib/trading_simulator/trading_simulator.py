@@ -9,13 +9,15 @@ from rich import print as rprint
 from lib import utils
 from lib.app_selector import app_selector
 from lib.database import TRADING_SIMULATOR_DB_SYSTEM_INFO_TABLE
+from lib import email
+from lib.database import GDRIVE_CLIENT, GSPREAD_CLIENT
 
 # Move to trading_simulator folder
 
 
 def trading_sim_menu():
     '''
-    TBD
+    Main menu function for the trading simulator. 
     '''
     os.system("clear")
     rprint("[green]Opening the TRADING SIMULATOR")
@@ -54,10 +56,9 @@ def generate_and_save_trades():
     data, file = create_simulated_trade_data(int(random.uniform(50, 150)))
     
     create_and_save_output_file(data, file)
-    rprint("[green]Data has been successfully generated and saved")
     update_system_date()
     rprint("[green]System Date of the trading application has now been rolled")
-    time.sleep(1)
+    time.sleep(2)
 
 # Menu selection related function
 
@@ -255,28 +256,19 @@ def create_simulated_trade_data(quantity_of_trades):
 # Helper function for generate_and_save_trades
 
 
-def create_and_save_output_file(
-        data,
-        file_name,
-        email="davidpeel.test1@gmail.com"):
+def create_and_save_output_file(data, file_name):
     """
     Using the Trading data, it creates a file and saves to google
     drive as a sheet and returns the file id.
+    It asks the user if they want a copy shared to them via email.
 
     Params:
     data: This represents a list of lists, of trade data that is output
     from the trading app.
     file_name: This is the file name for which the file is saved as
-    google_clients: This is the client connections required to save
-    the file to google drive and update google sheets. It requires a
-    Google Spreadsheet client then a Google Drive client.
 
     Returns: File Id when successfully saved to google drive
     """
-
-    google_clients = utils.get_google_clients()
-    GSPREAD_CLIENT = google_clients[0]
-    GDRIVE_CLIENT = google_clients[1]
 
     try:
         # Create a new file
@@ -285,21 +277,15 @@ def create_and_save_output_file(
             'mimeType': 'application/vnd.google-apps.spreadsheet',
         }
 
-        permissions = {
-            'type': 'user',
-            'role': 'writer',
-            'emailAddress': email,
-        }
-
         new_file = GDRIVE_CLIENT.files().create(
             body=new_file_metadata).execute()
-        GDRIVE_CLIENT.permissions().create(
-            fileId=new_file['id'], body=permissions).execute()
         print(f'File created with ID: {new_file["id"]}')
 
         workbook = GSPREAD_CLIENT.open_by_key(new_file["id"])
         sheet = workbook.sheet1
         sheet.append_rows(data)
+
+        email.create_link_menu(new_file)
 
     except Exception as e:
         print(f'Error creating new file: {e}')
