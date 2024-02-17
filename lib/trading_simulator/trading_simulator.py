@@ -52,7 +52,8 @@ def generate_and_save_trades():
 
     rprint("[green]Generating trade file...please wait")
     data, file = create_simulated_trade_data(int(random.uniform(50, 150)))
-    create_and_save_output_file(data, file)  # NOTE1
+    
+    create_and_save_output_file(data, file)
     rprint("[green]Data has been successfully generated and saved")
     update_system_date()
     rprint("[green]System Date of the trading application has now been rolled")

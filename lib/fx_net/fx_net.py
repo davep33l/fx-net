@@ -4,16 +4,19 @@ Main business logic for the FX Net application
 
 import os
 import time
+
 from rich import print as rprint
 from rich.console import Console
 from rich.table import Table
 import pandas as pd
 
 from lib import utils
+from lib import email
 from lib.database import GDRIVE_CLIENT, GSPREAD_CLIENT
 from lib.database import FX_NET_DB_TRADES_TABLE, FX_NET_DB_FILES_LOADED_TABLE
 from lib.database import FX_NET_DB_PAYMENTS_INX_TABLE
 from lib.app_selector import app_selector
+
 
 
 def fx_net_menu():
@@ -400,7 +403,7 @@ def create_netting_report_by_value_date():
             rprint("[green]Data populated to file")
             time.sleep(2)
 
-            create_link_menu(new_file)
+            email.create_link_menu(new_file)
 
         except Exception as e:
             print(f'Error creating new file: {e}')
@@ -645,50 +648,9 @@ def create_payment_files():
             rprint("[green]Data populated to file")
             time.sleep(2)
 
-            create_link_menu(new_file)
+            
+            email.create_link_menu(new_file)
 
         except Exception as e:
             print(f'Error creating new file: {e}')
 
-
-def create_shareable_link(file_object):
-    '''
-    Takes in a file object and creates a shareable link for the user to access.
-    '''
-
-    # Gives access to the file for anyone with the link
-    permissions = {
-        'type': 'anyone',
-        'role': 'reader',
-    }
-
-    GDRIVE_CLIENT.permissions().create(
-        fileId=file_object['id'], body=permissions).execute()
-
-    file_data = GDRIVE_CLIENT.files().get(
-        fileId=file_object['id'],
-        fields='webViewLink').execute()
-    file_shareable_link = list(file_data.values())[0]
-    rprint('[red]Use mouse to copy or ctrl+insert(win) or cmd+insert(mac)')
-    rprint('[red]ctrl+c will exit the program')
-    rprint(
-        f'[cyan]You can see your generated report here: {file_shareable_link}')
-
-    input("Press Enter to continue")
-
-
-def create_link_menu(file_id):
-    '''
-    Helper function to present the user with a menu asking if
-    the require a link for the file that has been generated.
-    '''
-
-    response = input("Do you want a link for the file. Press Y and enter: ")
-
-    if response.lower() == "y":
-        print("Creating link for you")
-        time.sleep(2)
-        create_shareable_link(file_id)
-    else:
-        print("Invalid option, no link created")
-        time.sleep(2)
