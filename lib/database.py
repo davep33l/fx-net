@@ -1,3 +1,7 @@
+'''
+Database related constant tables for access throughout the program
+'''
+
 from . import utils
 
 GSPREAD_CLIENT, GDRIVE_CLIENT = utils.get_google_clients()

@@ -290,7 +290,8 @@ def create_and_save_output_file(
             'emailAddress': email,
         }
 
-        new_file = GDRIVE_CLIENT.files().create(body=new_file_metadata).execute()
+        new_file = GDRIVE_CLIENT.files().create(
+            body=new_file_metadata).execute()
         GDRIVE_CLIENT.permissions().create(
             fileId=new_file['id'], body=permissions).execute()
         print(f'File created with ID: {new_file["id"]}')

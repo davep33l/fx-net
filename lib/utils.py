@@ -1,3 +1,7 @@
+'''
+Shared utilities for the package
+'''
+
 import time
 import os
 
@@ -23,7 +27,7 @@ def please_wait(seconds=3):
 
 def exit_message():
     '''
-    TBD
+    Small script that is used throughout the program to exit the program
     '''
     rprint("[red]The program is now exiting")
     please_wait()
@@ -51,11 +55,10 @@ def list_select_menu(menu):
 
     return menu[question][result]()
 
+
 # Specficially used this part of the documentation to work out how
 # to validate the input of a fuzzy menu
 # https://inquirerpy.readthedocs.io/en/latest/pages/prompts/fuzzy.html#codecell1
-
-
 def fuzzy_select_menu(message, choices):
     '''
     Menu generation function for a fuzzy search menu.
@@ -78,10 +81,15 @@ def fuzzy_select_menu(message, choices):
 
     return result
 
+
 def no_data_message():
+    '''
+    Small utility function to inform user of no data in the database
+    '''
     rprint("[red]No data stored in FX Net Database")
     rprint("[red]Please load data or select another option")
     time.sleep(2)
+
 
 def get_google_clients():
     """
@@ -92,16 +100,16 @@ def get_google_clients():
     GSPREAD_CLIENT and GDRIVE_CLIENT
     """
 
-    SCOPE = [
+    scope = [
         "https://www.googleapis.com/auth/spreadsheets",
         "https://www.googleapis.com/auth/drive.file",
         "https://www.googleapis.com/auth/drive"
     ]
 
-    CREDS = Credentials.from_service_account_file('creds.json')
-    SCOPED_CREDS = CREDS.with_scopes(SCOPE)
+    creds = Credentials.from_service_account_file('creds.json')
+    scoped_creds = creds.with_scopes(scope)
     # Google Sheets and Drive client connections
-    GSPREAD_CLIENT = gspread.authorize(SCOPED_CREDS)
-    GDRIVE_CLIENT = build('drive', 'v3', credentials=SCOPED_CREDS)
+    gspread_client = gspread.authorize(scoped_creds)
+    gdrive_client = build('drive', 'v3', credentials=scoped_creds)
 
-    return GSPREAD_CLIENT, GDRIVE_CLIENT
+    return gspread_client, gdrive_client

@@ -1,5 +1,5 @@
 '''
-TBD
+Main business logic for the FX Net application
 '''
 
 import os
@@ -64,15 +64,24 @@ def reporting_menu():
 
         reporting_menu_question = {
             "Please select an option?": {
-                "Netting Summary by Value Date": netting_summary_by_value_date,
-                "Create Netting Report by Value Date": create_netting_report_by_value_date,
-                "Create payment files": create_payment_files,
-                "Trade count by Client - All Trade Dates": trade_count_by_client,
-                "Trade count by Client - Trade Date Selector": trade_count_by_client_selector,
-                "Trade count by Client and Client Trader": trade_count_by_client_and_trader,
-                "Trade count by Bank Trader": trade_count_by_bank_trader,
-                "Return to FX Net Main Menu": fx_net_menu,
-                "Exit Program": utils.exit_message,
+                "Netting Summary by Value Date":
+                netting_summary_by_value_date,
+                "Create Netting Report by Value Date":
+                create_netting_report_by_value_date,
+                "Create payment files":
+                create_payment_files,
+                "Trade count by Client - All Trade Dates":
+                trade_count_by_client,
+                "Trade count by Client - Trade Date Selector":
+                trade_count_by_client_selector,
+                "Trade count by Client and Client Trader":
+                trade_count_by_client_and_trader,
+                "Trade count by Bank Trader":
+                trade_count_by_bank_trader,
+                "Return to FX Net Main Menu":
+                fx_net_menu,
+                "Exit Program":
+                utils.exit_message,
             }}
         utils.list_select_menu(reporting_menu_question)
 
@@ -123,8 +132,6 @@ def return_to_previous_menu():
     time.sleep(1)
     os.system("clear")
     app_selector.run()
-
-# Move to fx_net folder (uses a client)
 
 
 def get_trade_data_files_list():
@@ -196,12 +203,11 @@ def get_eligible_files_to_load():
 
     return eligible_files
 
-# move to either utils or to fx_net folder (uses a client)
-
 
 def delete_file(file_id):
     '''
-    TBD
+    Helper function the developer can use to clean up the
+    google drive environment
     '''
     try:
         GDRIVE_CLIENT.files().delete(fileId=file_id).execute()
@@ -209,8 +215,6 @@ def delete_file(file_id):
 
     except Exception as e:
         print(f'Error deleting file: {e}')
-
-# move to either utils or to fx_net folder (uses a client)
 
 
 def get_file_list(file_name_filter=None):
@@ -241,11 +245,11 @@ def get_file_list(file_name_filter=None):
 
     return list_of_files
 
-# move to fx_net folder (uses a client)
 
 def netting_summary_by_value_date():
     '''
-    TBD
+    Creates the netting summary by value date based on selection by
+    the user. It prints the summary to the console.
     '''
     os.system("clear")
     dates = get_available_report_dates_by_type("value")
@@ -305,20 +309,6 @@ def netting_summary_by_value_date():
         rprint("[cyan]Scroll to see full table if required")
         input("Press Enter to continue")
 
-# move to fx_net folder (uses a client)
-
-
-def get_most_recent_file():
-    '''
-    TBD
-    '''
-    trades_data = FX_NET_DB_TRADES_TABLE.get_all_values()
-    df = pd.DataFrame(trades_data[1:], columns=trades_data[0])
-    unique_value_dates = df['VALUE_DATE'].unique()
-    return unique_value_dates[-1]
-
-# move to fx_net folder (uses a client)
-
 
 def create_netting_report_by_value_date():
     """
@@ -347,7 +337,8 @@ def create_netting_report_by_value_date():
                 'mimeType': 'application/vnd.google-apps.spreadsheet',
             }
 
-            new_file = GDRIVE_CLIENT.files().create(body=new_file_metadata).execute()
+            new_file = GDRIVE_CLIENT.files().create(
+                body=new_file_metadata).execute()
             print(f'File created with ID: {new_file["id"]}')
 
             headings = df.columns.tolist()
@@ -416,6 +407,13 @@ def create_netting_report_by_value_date():
 
 
 def trade_count_by_client(trade_date_filter=False):
+    '''
+    Checks trade data in TRADES table and presents a count
+    by bank trader to the console. If no data, it informs the user.
+    Has the options to take in a value date filter to give the function
+    dual purpose.
+
+    '''
     os.system("clear")
     trades_data = FX_NET_DB_TRADES_TABLE.get_all_values()
     df = pd.DataFrame(trades_data[1:], columns=trades_data[0])
@@ -448,6 +446,10 @@ def trade_count_by_client(trade_date_filter=False):
 
 
 def trade_count_by_client_selector():
+    '''
+    Helper function to allow reuse of the trade_count_by_client function
+    in the menu system
+    '''
     trade_count_by_client(True)
 
 
@@ -476,6 +478,11 @@ def get_available_report_dates_by_type(value_or_trade):
 
 
 def trade_count_by_client_and_trader():
+    '''
+    Checks trade data in TRADES table and presents a count
+    by client and client trader to the console. If no data,
+    it informs the user.
+    '''
     os.system("clear")
 
     dates = get_available_report_dates_by_type("trade")
@@ -485,13 +492,20 @@ def trade_count_by_client_and_trader():
         trades_data = FX_NET_DB_TRADES_TABLE.get_all_values()
         df = pd.DataFrame(trades_data[1:], columns=trades_data[0])
 
-        client_trade_counts = dict(df.groupby(["CLIENT_NAME", "CLIENT_TRADER"])[
-                                "CLIENT_TRADER"].count())
+        client_trade_counts = dict(df.groupby(
+            ["CLIENT_NAME", "CLIENT_TRADER"])[
+            "CLIENT_TRADER"].count())
 
-        table = Table(title=f"\n\nTrades booked by Client Trader")
+        table = Table(title="\n\nTrades booked by Client Trader")
         table.add_column("Client Name", justify="center", style="white")
-        table.add_column("Client Client Trader", justify="center", style="white")
-        table.add_column("Count of Trades Booked", justify="center", style="white")
+        table.add_column(
+            "Client Client Trader",
+            justify="center",
+            style="white")
+        table.add_column(
+            "Count of Trades Booked",
+            justify="center",
+            style="white")
 
         for (client, trader), client_trade_counts in client_trade_counts.items():
             table.add_row(client, trader, str(client_trade_counts))
@@ -504,6 +518,10 @@ def trade_count_by_client_and_trader():
 
 
 def trade_count_by_bank_trader():
+    '''
+    Checks trade data in TRADES table and presents a count
+    by bank trader to the console. If no data, it informs the user.
+    '''
     os.system("clear")
 
     dates = get_available_report_dates_by_type("trade")
@@ -513,11 +531,15 @@ def trade_count_by_bank_trader():
         trades_data = FX_NET_DB_TRADES_TABLE.get_all_values()
         df = pd.DataFrame(trades_data[1:], columns=trades_data[0])
 
-        bank_trader_trade_counts = list(df['BANK_TRADER'].value_counts().items())
+        bank_trader_trade_counts = list(
+            df['BANK_TRADER'].value_counts().items())
 
-        table = Table(title=f"\n\nTrade Count by Bank Trader")
+        table = Table(title="\n\nTrade Count by Bank Trader")
         table.add_column("Bank Trader Name", justify="center", style="white")
-        table.add_column("Count of Trades Booked", justify="center", style="white")
+        table.add_column(
+            "Count of Trades Booked",
+            justify="center",
+            style="white")
 
         for client, count_of_trades in bank_trader_trade_counts:
             table.add_row(client, str(count_of_trades))
@@ -529,6 +551,11 @@ def trade_count_by_bank_trader():
 
 
 def create_payment_files():
+    '''
+    Checks trade data in TRADES table and creates a netting summary.
+    It combines the netting summary against the stored payment information
+    for the client and produces a report with the combined details.
+    '''
 
     os.system("clear")
     trades_data = FX_NET_DB_TRADES_TABLE.get_all_values()
@@ -550,7 +577,8 @@ def create_payment_files():
                 'mimeType': 'application/vnd.google-apps.spreadsheet',
             }
 
-            new_file = GDRIVE_CLIENT.files().create(body=new_file_metadata).execute()
+            new_file = GDRIVE_CLIENT.files().create(
+                body=new_file_metadata).execute()
             print(f'File created with ID: {new_file["id"]}')
 
             workbook = GSPREAD_CLIENT.open_by_key(new_file["id"])
@@ -624,12 +652,16 @@ def create_payment_files():
 
 
 def create_shareable_link(file_object):
+    '''
+    Takes in a file object and creates a shareable link for the user to access.
+    '''
 
     # Gives access to the file for anyone with the link
     permissions = {
         'type': 'anyone',
         'role': 'reader',
     }
+
     GDRIVE_CLIENT.permissions().create(
         fileId=file_object['id'], body=permissions).execute()
 
@@ -637,7 +669,8 @@ def create_shareable_link(file_object):
         fileId=file_object['id'],
         fields='webViewLink').execute()
     file_shareable_link = list(file_data.values())[0]
-    rprint('[red]Either use mouse context menu to copy or ctrl+insert(windows) or cmd+insert(mac)')
+    rprint('[red]Use mouse to copy or ctrl+insert(win) or cmd+insert(mac)')
+    rprint('[red]ctrl+c will exit the program')
     rprint(
         f'[cyan]You can see your generated report here: {file_shareable_link}')
 
@@ -645,6 +678,11 @@ def create_shareable_link(file_object):
 
 
 def create_link_menu(file_id):
+    '''
+    Helper function to present the user with a menu asking if
+    the require a link for the file that has been generated.
+    '''
+
     response = input("Do you want a link for the file. Press Y and enter: ")
 
     if response.lower() == "y":
