@@ -345,15 +345,7 @@ def create_netting_report_by_value_date():
                 'mimeType': 'application/vnd.google-apps.spreadsheet',
             }
 
-            permissions = {
-                'type': 'user',
-                'role': 'writer',
-                'emailAddress': 'davidpeel.test1@gmail.com',
-            }
-
             new_file = GDRIVE_CLIENT.files().create(body=new_file_metadata).execute()
-            GDRIVE_CLIENT.permissions().create(
-                fileId=new_file['id'], body=permissions).execute()
             print(f'File created with ID: {new_file["id"]}')
 
             headings = df.columns.tolist()
@@ -413,11 +405,7 @@ def create_netting_report_by_value_date():
             rprint("[green]Data populated to file")
             time.sleep(2)
 
-            file_data = GDRIVE_CLIENT.files().get(fileId=new_file['id'], fields='webViewLink').execute()
-            file_shareable_link = list(file_data.values())[0]
-            rprint(f'[cyan]You can see your generated report here: {file_shareable_link}')
-
-            input("Press Enter to continue")
+            create_link_menu(new_file)          
 
         except Exception as e:
             print(f'Error creating new file: {e}')
@@ -551,23 +539,13 @@ def create_payment_files():
                 'mimeType': 'application/vnd.google-apps.spreadsheet',
             }
 
-            permissions = {
-                'type': 'user',
-                'role': 'writer',
-                'emailAddress': 'davidpeel.test1@gmail.com',
-            }
-
-
             new_file = GDRIVE_CLIENT.files().create(body=new_file_metadata).execute()
-            GDRIVE_CLIENT.permissions().create(
-                fileId=new_file['id'], body=permissions).execute()
             print(f'File created with ID: {new_file["id"]}')
 
             workbook = GSPREAD_CLIENT.open_by_key(new_file["id"])
             breakdown_sheet = workbook.add_worksheet(title="Payment Report", rows=100, cols=20)
             workbook.del_worksheet(workbook.sheet1)
 
-            # breakdown_sheet.append_row(["Client", "CCY", "OVERALL_NET", "ACTIONS"])
             netting_data = []
 
             df['BUY_AMT'] = pd.to_numeric(df['BUY_AMT'], errors='coerce')
@@ -617,11 +595,35 @@ def create_payment_files():
             rprint("[green]Data populated to file")
             time.sleep(2)
 
-            file_data = GDRIVE_CLIENT.files().get(fileId=new_file['id'], fields='webViewLink').execute()
-            file_shareable_link = list(file_data.values())[0]
-            rprint(f'[cyan]You can see your generated report here: {file_shareable_link}')
-
-            input("Press Enter to continue")
+            create_link_menu(new_file)
 
         except Exception as e:
             print(f'Error creating new file: {e}')
+
+def create_shareable_link(file_object):
+    
+    # Gives access to the file for anyone with the link
+    permissions = {
+    'type': 'anyone',
+    'role': 'reader',
+}
+    GDRIVE_CLIENT.permissions().create(
+    fileId=file_object['id'], body=permissions).execute()
+    
+    file_data = GDRIVE_CLIENT.files().get(fileId=file_object['id'], fields='webViewLink').execute()
+    file_shareable_link = list(file_data.values())[0]
+    rprint('[red]Please use your mouse to highlight the link and right click to copy')
+    rprint(f'[cyan]You can see your generated report here: {file_shareable_link}')
+
+    input("Press Enter to continue")
+
+def create_link_menu(file_id):
+    response = input("Do you want a link for the file. Press Y and enter: ")
+
+    if response.lower() == "y":
+        print("Creating link for you")
+        time.sleep(2)
+        create_shareable_link(file_id)
+    else:
+        print("Invalid option, no link created")
+        time.sleep(2)  
