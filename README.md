@@ -89,16 +89,17 @@ Produce payment files in accepted format for payment system
 ##### Sub Requirement 4.1
 1. The requirement for the payment system is that the output file must contain
 
-Currency, Amount, Client Payment Instructions, Value Date
+Currency, Amount, Client Payment Instructions
 
 ## Features
 1. Intuitive menu system with prompted responses for selection control
-2. Create a shareable file to google drive
-3. Analysis options to view additional trends by client, currencies traded etc
+2. Create a shareable file via google drive / google sheets for the user
+3. Analysis options to view additional trends by client
 4. Produce reports in spreadsheet format 
 5. Produce reports in the console for quick viewing of netting breakdown
-6. Risk reduction by minimising any user intervention
-7. Time saving by automating manual processes
+6. Produce report / file for downstream application consumption
+7. Risk reduction by minimising any user intervention
+8. Time saving by automating manual processes
 
 ## Flow Charts
 
@@ -114,7 +115,7 @@ Currency, Amount, Client Payment Instructions, Value Date
 
 ### Data Model (Trading Application)
 
-- Trading Application will track a "system" date to ensure a simulated file is only created once per Trade date
+- Trading Application tracks a "system" date to ensure a simulated file is only created once per Trade date
 
 ## FX NET Application Design / Architecture
 
@@ -128,10 +129,33 @@ Currency, Amount, Client Payment Instructions, Value Date
 
 ### Data Model (FX NET)
 
-- FX NET will contain the parsed data in a master trade file
-- FX NET will contain client payment information
+- FX NET contains a record of files already loaded into the system to prevent duplication
+- FX NET contains the parsed data in a master TRADES table
+- FX NET will contain client payment information to merge with netting data to create downstream files / user reports
+
+## Important Links
+
+https://docs.google.com/spreadsheets/d/1DmgUmpsNXHFSekrgH9WajUaWs2eUkfRlWZsYw6504y4/edit?usp=sharing
+
+https://docs.google.com/spreadsheets/d/1kbWMvUXe6WR4nqJg_5q7plLTB3eW3tVaQK06-hoY5cY/edit?usp=sharing
 
 ## Deployment
+
+The project repo is stored on Github and was created as follows.
+
+1. New repo created using the code institute template
+
+
+The project was deployed using Heroku
+
+The project back end used google cloud
+
+
+
+
+## Development Environment
+
+I developed locally using VS Code, with python, node.js, heroko CLI (for local depoloyment testing). Also whilst trialling curses for python I set up my environment using WSL2 and continued to use WSL2 for the remainder of the development as I felt this closely matched the Linux template in which the project will be deployed in the browser with. Nice learning experience in addition to the project to use these applications and tools. 
 
 ## Technologies Used
 ### Languages Used
@@ -158,8 +182,36 @@ This project was developed solely in Python
 |[ui.dev/amiresponsive](https://ui.dev/amiresponsive)|Online Software| Misc| This was used to create the responsive image for the top of the readme|
 
 ## Testing
+
+Please refer to the [TESTING.md](./testing/TESTING.md) file
+
 ## Bugs
+
+There are no known bugs in the code itself, however it is worth pointing out that my mentor advised this could not be run within Safari. 
+I had tested on Chrome on a Windows PC throughout development. 
+
 ## Credits 
-### Code
+### Resources
+
+I extensively read lots of package documentation and api documentation (especially for google-api-client-python-auth) to complete this project. They include:
+
+| What  | Type  | Source(s)  | Purpose  |   
+|---|---|---|---|
+|rich|Python package|https://rich.readthedocs.io/en/stable/introduction.html | For console printing |
+|pandas|Python package|https://pandas.pydata.org/docs/index.html | For data manipulation |
+|InquirerPy|Python package| https://inquirerpy.readthedocs.io/en/latest/index.html| For question propmts and user validation control |
+|gspread|Python package| https://docs.gspread.org/en/latest/| For interacting with google sheets documents |
+|google-auth|Python package| https://google-auth.readthedocs.io/en/master/| For authenticating to google api services (Code Institute LMS Taught)|
+|google-api-client-python-auth|Python package|https://github.com/googleapis/google-api-python-client https://developers.google.com/drive/api/reference/rest/v3 | For accessing Google Drive functionality for file creation / sharing|
+
+For more python specific resources, I leaned on the LMS exercises to cement some of the core fundamentatals around syntax (especially for dictionaries)
+
+Also during the process of creating this project, I experimented with bcrypt, curses, ASCII Art generation but decided to opt out of using these features as they did not suit the requirement and feel of the project. 
+
 ### Acknowledgements
+
+Thank you to my mentor who gave me encouragement to push myself again on this project and confirm I was on the right track with regards to structure of my code. Also giving me additional things to think about in terms of pipenv and poetry (as I use venv currently). Also discussing pytest, autopep8 and pylint, ruff (vs code ext)
+
 ## Additional Notes
+
+Throughout the course of the project, I tested and tried multiple different packages and libraries that may have had features that could improve this projects. I finally settled on the ones I have chosen, but want to call out that curses would have been a really cool package to use, however I had already implemented the menu system with InquirerPy and the presentation with rich and felt the implementation of curses would have made the application overly complex to complete within the deadline. 

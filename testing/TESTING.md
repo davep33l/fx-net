@@ -34,20 +34,36 @@ I cleared out the `fx_net_db` database (workbook) of any information on the rele
 | Test ID | Description | Outcome | Comments | Evidence |
 |--------|-------------|---------|----------|----------|
 | test1 | Test Netting Summary by Value Date menu option informs the user that there is no data available | Passed | Noticed the UI was not clearing like the other tests. Corrected by creating a new function to (`no_data_message`) control the action of displaing a message when there is no data and applied to all related other functions | ![](../testing/gifs/test1.gif) |
-| test2 | Test Netting Summary by Value Date menu option informs the user that there is no data available | Passed || ![](../testing/gifs/test2.gif) |
-| test3 | Test Netting Summary by Value Date menu option informs the user that there is no data available | Passed || ![](../testing/gifs/test3.gif) |
-| test4 | Test Netting Summary by Value Date menu option informs the user that there is no data available | Passed || ![](../testing/gifs/test4.gif) |
-| test5 | Test Netting Summary by Value Date menu option informs the user that there is no data available | Passed || ![](../testing/gifs/test5.gif) |
-| test6 | Test Netting Summary by Value Date menu option informs the user that there is no data available | Passed | Was not clearing initially, refactored to include the newly created `no_data_message` function | ![](../testing/gifs/test6.gif) |
-| test7 | Test Netting Summary by Value Date menu option informs the user that there is no data available | Passed | Was not clearing initially, refactored to include the newly created `no_data_message` function | ![](../testing/gifs/test7.gif) |
+| test2 | Test Create Netting Report by Value Date menu option informs the user that there is no data available | Passed || ![](../testing/gifs/test2.gif) |
+| test3 | Test Create payment files menu option informs the user that there is no data available | Passed || ![](../testing/gifs/test3.gif) |
+| test4 | Test Trade count by Client - All Trade Dates menu option informs the user that there is no data available | Passed || ![](../testing/gifs/test4.gif) |
+| test5 | Test Trade count by Client - Trade Date Selector menu option informs the user that there is no data available | Passed || ![](../testing/gifs/test5.gif) |
+| test6 | Test Trade count by Client and Client Trader menu option informs the user that there is no data available | Passed | Was not clearing initially, refactored to include the newly created `no_data_message` function | ![](../testing/gifs/test6.gif) |
+| test7 | Test Trade count by Bank Trader menu option informs the user that there is no data available | Passed | Was not clearing initially, refactored to include the newly created `no_data_message` function | ![](../testing/gifs/test7.gif) |
 
 
 
 ## TESTING TABLES UPDATE CORRECTLY
 
-system date
-files loaded
-trades
+These tests are to check the relevant tables in either `trading_simulator_db` and `fx_net_db` are updated correctly based on the options the users select in the console. 
+
+| Test ID | Description | Outcome | Comments | Evidence |
+|--------|-------------|---------|----------|----------|
+| test8 | Test the `TRADING_APP_DATE` is updated by one business day after generating the trade data file (weekday to weekday) | Passed |  | ![](../testing/gifs/test8.gif) |
+| test9 | Test the `TRADING_APP_DATE` is updated by one business day after generating the trade data file (over weekend test) | Passed | It should not generate a trade date of a Saturday or Sunday (which it does not) | ![](../testing/gifs/test9.gif) |
+| test10 | Test the `FILES_LOADED` table is updated. Recording the files already uploaded into the `TRADES` table. This ensures that the user doesn't have the option to load duplicate files into the `TRADES` table | Passed | This test also demonstrates the fuzzy search selection of files and shows a prompt to the user when no files are available for loading | ![](../testing/gifs/test10.gif) |
+| test11 | Test the `TRADES` table is updated. | Passed | See test10 for full details on functionality | ![](../testing/gifs/test11.gif) |
+
+
+## TESTING CONSOLE REPORTING UPDATES CORRECTLY
+
+See [Netting Evidence Excel File](/testing/data/netting-evidence.xlsx) with calculation evidence. Needs to be opened in a spreadsheet application (Googlesheet/Excel etc)
+
+## TESTING SPREADSHEET REPORTS GENERATE CORRECTLY
 
 ## TESTING FILES GENERATE CORRECTLY
+
+## TESTING EXIT PROGRAM FOR EACH MENU
+
+## TESTING RETURN TO PREVIOUS MENU FOR EACH MENU
 

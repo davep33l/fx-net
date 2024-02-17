@@ -99,7 +99,6 @@ def load_fx_data():
         time.sleep(2)
     else:
         choice = utils.fuzzy_select_menu("Pick a file to load", file_names)
-        print(choice)
 
         for file in file_data:
             if file[0] == choice:
