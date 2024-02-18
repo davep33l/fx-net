@@ -7,9 +7,7 @@ import os
 
 from rich import print as rprint
 from InquirerPy import inquirer
-import gspread
-from google.oauth2.service_account import Credentials
-from googleapiclient.discovery import build
+from lib.database import GDRIVE_CLIENT
 
 
 def please_wait(seconds=3):
@@ -56,9 +54,6 @@ def list_select_menu(menu):
     return menu[question][result]()
 
 
-# Specficially used this part of the documentation to work out how
-# to validate the input of a fuzzy menu
-# https://inquirerpy.readthedocs.io/en/latest/pages/prompts/fuzzy.html#codecell1
 def fuzzy_select_menu(message, choices):
     '''
     Menu generation function for a fuzzy search menu.
@@ -91,25 +86,44 @@ def no_data_message():
     time.sleep(2)
 
 
-def get_google_clients():
-    """
-    Function that creates a Google Spreadsheet client and
-    creates a Google Drive client that have been authenticated.
+def delete_file(file_id):
+    '''
+    Helper function the developer can use to clean up the
+    google drive environment
+    '''
+    try:
+        GDRIVE_CLIENT.files().delete(fileId=file_id).execute()
+        print(f'File with ID {file_id} successfully deleted.')
 
-    Returns a tuple of clients:
-    GSPREAD_CLIENT and GDRIVE_CLIENT
-    """
+    except Exception as e:
+        print(f'Error deleting file: {e}')
 
-    scope = [
-        "https://www.googleapis.com/auth/spreadsheets",
-        "https://www.googleapis.com/auth/drive.file",
-        "https://www.googleapis.com/auth/drive"
-    ]
 
-    creds = Credentials.from_service_account_file('creds.json')
-    scoped_creds = creds.with_scopes(scope)
-    # Google Sheets and Drive client connections
-    gspread_client = gspread.authorize(scoped_creds)
-    gdrive_client = build('drive', 'v3', credentials=scoped_creds)
+def get_file_list(file_name_filter=None):
+    '''
+    TBD
+    '''
+    list_of_files = []
+    if file_name_filter is None:
+        notification = "with no filter"
+    else:
+        notification = f'with filter of "{file_name_filter}"'
+    print(f'Files in Google Drive {notification}:')
+    results = GDRIVE_CLIENT.files().list().execute()
+    files = results.get('files', [])
+    if not files:
+        print('No files found in Google Drive.')
+    else:
+        for file in files:
+            if file_name_filter is None:
+                print(f"{file['name']} ({file['id']})")
+                # list_of_files.append((file['name'], file['id']))
+                list_of_files.append((file['id']))
 
-    return gspread_client, gdrive_client
+            elif file["name"].startswith(file_name_filter):
+                print(f"{file['name']} ({file['id']})")
+                # list_of_files.append((file['name'], file['id']))
+                list_of_files.append((file['id']))
+
+    return list_of_files
+

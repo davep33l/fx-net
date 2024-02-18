@@ -5,6 +5,10 @@ from rich import print as rprint
 
 from lib.database import GDRIVE_CLIENT
 
+# Code for validation from below link
+# https://emaillistvalidation.com/blog/
+# check-email-using-regex-in-python-validate
+# -email-addresses-with-confidence/
 def validate_email(email):
     '''
     Uses regex to validate the most common email address patterns

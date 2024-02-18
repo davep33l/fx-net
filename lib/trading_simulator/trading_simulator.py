@@ -12,8 +12,6 @@ from lib.database import TRADING_SIMULATOR_DB_SYSTEM_INFO_TABLE
 from lib import email
 from lib.database import GDRIVE_CLIENT, GSPREAD_CLIENT
 
-# Move to trading_simulator folder
-
 
 def trading_sim_menu():
     '''
@@ -40,8 +38,6 @@ def trading_sim_menu():
 
         utils.list_select_menu(trading_simulator_question)
 
-# Menu selection related function
-
 
 def generate_and_save_trades():
     '''
@@ -60,8 +56,6 @@ def generate_and_save_trades():
     rprint("[green]System Date of the trading application has now been rolled")
     time.sleep(2)
 
-# Menu selection related function
-
 
 def return_to_previous_menu():
     '''
@@ -73,8 +67,6 @@ def return_to_previous_menu():
     time.sleep(1)
     os.system("clear")
     app_selector.run()
-
-# Helper function for generate_and_save_trades
 
 
 def create_simulated_trade_data(quantity_of_trades):
@@ -253,8 +245,6 @@ def create_simulated_trade_data(quantity_of_trades):
 
     return full_data, file_name
 
-# Helper function for generate_and_save_trades
-
 
 def create_and_save_output_file(data, file_name):
     """
@@ -291,8 +281,6 @@ def create_and_save_output_file(data, file_name):
         print(f'Error creating new file: {e}')
 
     return new_file["id"]
-
-# Helper function for generate_and_save_trades
 
 
 def update_system_date():

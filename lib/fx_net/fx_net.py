@@ -207,48 +207,6 @@ def get_eligible_files_to_load():
     return eligible_files
 
 
-def delete_file(file_id):
-    '''
-    Helper function the developer can use to clean up the
-    google drive environment
-    '''
-    try:
-        GDRIVE_CLIENT.files().delete(fileId=file_id).execute()
-        print(f'File with ID {file_id} successfully deleted.')
-
-    except Exception as e:
-        print(f'Error deleting file: {e}')
-
-
-def get_file_list(file_name_filter=None):
-    '''
-    TBD
-    '''
-    list_of_files = []
-    if file_name_filter is None:
-        notification = "with no filter"
-    else:
-        notification = f'with filter of "{file_name_filter}"'
-    print(f'Files in Google Drive {notification}:')
-    results = GDRIVE_CLIENT.files().list().execute()
-    files = results.get('files', [])
-    if not files:
-        print('No files found in Google Drive.')
-    else:
-        for file in files:
-            if file_name_filter is None:
-                print(f"{file['name']} ({file['id']})")
-                # list_of_files.append((file['name'], file['id']))
-                list_of_files.append((file['id']))
-
-            elif file["name"].startswith(file_name_filter):
-                print(f"{file['name']} ({file['id']})")
-                # list_of_files.append((file['name'], file['id']))
-                list_of_files.append((file['id']))
-
-    return list_of_files
-
-
 def netting_summary_by_value_date():
     '''
     Creates the netting summary by value date based on selection by

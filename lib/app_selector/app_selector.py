@@ -8,9 +8,9 @@ import os
 from rich import print as rprint
 
 # Module imports
-from ..trading_simulator.trading_simulator import trading_sim_menu
-from ..fx_net.fx_net import fx_net_menu
-from ..utils import exit_message, list_select_menu
+from lib.trading_simulator.trading_simulator import trading_sim_menu
+from lib.fx_net.fx_net import fx_net_menu
+from lib.utils import exit_message, list_select_menu
 
 
 def run():
