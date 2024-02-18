@@ -13,10 +13,10 @@ import pandas as pd
 from lib import utils
 from lib import email
 from lib.database import GDRIVE_CLIENT, GSPREAD_CLIENT
-from lib.database import FX_NET_DB_TRADES_TABLE, FX_NET_DB_FILES_LOADED_TABLE
+from lib.database import (FX_NET_DB_TRADES_TABLE,
+                          FX_NET_DB_FILES_LOADED_TABLE)
 from lib.database import FX_NET_DB_PAYMENTS_INX_TABLE
 from lib.app_selector import app_selector
-
 
 
 def fx_net_menu():
@@ -28,7 +28,7 @@ def fx_net_menu():
 
     '''
     rprint("[green]Opening the FX Net Application")
-    utils.please_wait()
+    utils.wait_notification()
     os.system("clear")
     rprint("[green]FX Net is open")
     time.sleep(1)
@@ -195,14 +195,11 @@ def get_eligible_files_to_load():
 
     files_already_loaded = get_files_already_loaded()
     files_to_load = get_trade_data_files_list()
-    # print(files_already_loaded)
-    # print(files_to_load)
 
     eligible_files = []
     for file in files_to_load:
         if file[1] not in files_already_loaded:
             eligible_files.append(file)
-    # print(eligible_files)
 
     return eligible_files
 
@@ -292,7 +289,6 @@ def create_netting_report_by_value_date():
         print("Creating Report for value", date)
 
         try:
-            # Create a new file
             new_file_metadata = {
                 'name': f'netting_report_vd_{date}',
                 'mimeType': 'application/vnd.google-apps.spreadsheet',
@@ -532,7 +528,6 @@ def create_payment_files():
         print("Creating Report for value", date)
 
         try:
-            # Create a new file
             new_file_metadata = {
                 'name': f'payment_report_vd_{date}',
                 'mimeType': 'application/vnd.google-apps.spreadsheet',
@@ -606,9 +601,7 @@ def create_payment_files():
             rprint("[green]Data populated to file")
             time.sleep(2)
 
-            
             email.create_link_menu(new_file)
 
         except Exception as e:
             print(f'Error creating new file: {e}')
-

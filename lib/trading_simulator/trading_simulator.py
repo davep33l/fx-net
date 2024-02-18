@@ -1,3 +1,22 @@
+'''
+Main trading simulator module, containing all functions for the
+application to run,
+
+Contents:
+
+Main menu (orchestration)
+- trading_sim_menu
+
+Functions called from trading_sim_menu
+- generate_and_save_trades
+- return_to_previous_menu
+
+Called functions within generate_and_save_trades
+- create_simulated_trade_data
+- create_and_save_output_file
+- update_system_date
+'''
+
 import os
 import time
 import random
@@ -15,11 +34,11 @@ from lib.database import GDRIVE_CLIENT, GSPREAD_CLIENT
 
 def trading_sim_menu():
     '''
-    Main menu function for the trading simulator. 
+    Main menu function for the trading simulator.
     '''
     os.system("clear")
     rprint("[green]Opening the TRADING SIMULATOR")
-    utils.please_wait()
+    utils.wait_notification()
     rprint("[green]TRADING SIMULATOR is now open")
     time.sleep(2)
     os.system("clear")
@@ -39,24 +58,6 @@ def trading_sim_menu():
         utils.list_select_menu(trading_simulator_question)
 
 
-def generate_and_save_trades():
-    '''
-    This function calls the create_simulated_trade_data function to
-    create a random file of trades betwee 50,150
-
-    Then creates the file of data and saves tthe file. It makes the file
-    shared to a specific email address.
-    '''
-
-    rprint("[green]Generating trade file...please wait")
-    data, file = create_simulated_trade_data(int(random.uniform(50, 150)))
-    
-    create_and_save_output_file(data, file)
-    update_system_date()
-    rprint("[green]System Date of the trading application has now been rolled")
-    time.sleep(2)
-
-
 def return_to_previous_menu():
     '''
     Small function to inform user of returning to main menu.
@@ -67,6 +68,22 @@ def return_to_previous_menu():
     time.sleep(1)
     os.system("clear")
     app_selector.run()
+
+
+def generate_and_save_trades():
+    '''
+    This function calls the create_simulated_trade_data function to
+    create a random file of trades betwee 50,150
+
+    Then creates the file of data and saves the file.
+    '''
+
+    rprint("[green]Generating trade file...please wait")
+    data, file = create_simulated_trade_data(int(random.uniform(50, 150)))
+    create_and_save_output_file(data, file)
+    update_system_date()
+    rprint("[green]System Date of the trading application has now been rolled")
+    time.sleep(2)
 
 
 def create_simulated_trade_data(quantity_of_trades):
@@ -214,6 +231,7 @@ def create_simulated_trade_data(quantity_of_trades):
 
         # Ensures the value date is always the next business day
         value_date_iso_format = trade_date_iso_format + timedelta(1)
+
         # Check if the day is Saturday (5) or Sunday (6) and increases until it
         # is a weekday
         while value_date_iso_format.weekday() >= 5:

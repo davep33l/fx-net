@@ -1,5 +1,20 @@
 '''
-Shared utilities for the package
+Shared utilities for the package.
+
+Contents: 
+
+Helper functions for reusable user notifications
+that print to the console:
+
+- wait_notification
+- no_data_message
+- exit_message
+
+Helper functions for creating custom menus with InquirerPY.
+
+- list_select_menu
+- fuzzy_select_menu
+
 '''
 
 import time
@@ -7,14 +22,18 @@ import os
 
 from rich import print as rprint
 from InquirerPy import inquirer
+
 from lib.database import GDRIVE_CLIENT
 
 
-def please_wait(seconds=3):
+def wait_notification(seconds=3):
     '''
     Helper function to print please wait to the console.
     It takes in an integer param which determines how many
-    periods to print (and how many seconds to wait)
+    periods (.) to print (and how many seconds to wait).
+
+    Params: seconds as an integer for the number of seconds.
+    Default of 3 seconds.
     '''
     for _ in range(seconds):
         time.sleep(1)
@@ -25,22 +44,49 @@ def please_wait(seconds=3):
 
 def exit_message():
     '''
-    Small script that is used throughout the program to exit the program
+    Small script that is used throughout the program to exit
+    the program upon user direction.
+
+    Raises: SystemExit after the exit message is displayed.
     '''
     rprint("[red]The program is now exiting")
-    please_wait()
-    rprint("Goodbye!")
+    wait_notification()
+    rprint("[cyan]Goodbye!")
     time.sleep(1)
     os.system("clear")
 
     raise SystemExit
 
 
+def no_data_message():
+    '''
+    Small utility function to inform user of no data in the database
+    '''
+    rprint("[red]No data stored in FX Net Database")
+    rprint("[red]Please load data or select another option")
+    time.sleep(2)
+
+
 def list_select_menu(menu):
     '''
     Menu generation function that takes in a dict containing
-    a question as the key then another dict of responses and
-    functions associated with those responses
+    a question as the key then another dict as the value
+    containing responses as keys and functions associated
+    with those responses as values.
+
+    Params: menu dictionary
+
+    Example:
+    question = {
+    "Please select an option?": {
+        "option 1": option_1_function,
+        "option 2": option_2_function,
+    }}
+
+    list_select_menu(question)
+
+    If user selects option 2 then option_2_function
+    is called.
 
     Returns: The executed function based on the response
     '''
@@ -57,14 +103,27 @@ def list_select_menu(menu):
 def fuzzy_select_menu(message, choices):
     '''
     Menu generation function for a fuzzy search menu.
-    You need to pass in a message and a list of choices.
+
+    Params: message as a string represents the question
+    being asked.
+    choices as a list represents the choices the user
+    can select.
+
     There is a validation to check if the choice is in the
     initial list you passed in.
+
+    Example:
+    dates = ["20240301","20240521"]
+    date = fuzzy_select_menu("Type or select a date: ", dates)
 
     Returns the choice
     '''
 
     def validate_choice(choice):
+        '''
+        Validates if the choice is in the list of choices
+        provided
+        '''
         if choice in choices:
             return True
 
@@ -77,13 +136,39 @@ def fuzzy_select_menu(message, choices):
     return result
 
 
-def no_data_message():
+def get_file_list(file_name_filter=None):
     '''
-    Small utility function to inform user of no data in the database
+    Helper function to list all file ids in google drive.
+    Prints the file name and id to the console whilst running.
+
+    Optional Params:
+    file_name_filter is the filter of file name you wish to
+    look for
+
+    Returns:
+    list_of_file_ids which is a list of file ids in google drive
+
     '''
-    rprint("[red]No data stored in FX Net Database")
-    rprint("[red]Please load data or select another option")
-    time.sleep(2)
+    list_of_file_ids = []
+    if file_name_filter is None:
+        notification = "NO FILTER"
+    else:
+        notification = f'with filter of "{file_name_filter}"'
+    print(f'Files in Google Drive {notification}:')
+    results = GDRIVE_CLIENT.files().list().execute()
+    files = results.get('files', [])
+    if not files:
+        print('No files found in Google Drive.')
+    else:
+        for file in files:
+            if file_name_filter is None:
+                print(f"{file['name']} ({file['id']})")
+                list_of_file_ids.append((file['id']))
+            elif file["name"].startswith(file_name_filter):
+                print(f"{file['name']} ({file['id']})")
+                list_of_file_ids.append((file['id']))
+
+    return list_of_file_ids
 
 
 def delete_file(file_id):
@@ -97,33 +182,4 @@ def delete_file(file_id):
 
     except Exception as e:
         print(f'Error deleting file: {e}')
-
-
-def get_file_list(file_name_filter=None):
-    '''
-    TBD
-    '''
-    list_of_files = []
-    if file_name_filter is None:
-        notification = "with no filter"
-    else:
-        notification = f'with filter of "{file_name_filter}"'
-    print(f'Files in Google Drive {notification}:')
-    results = GDRIVE_CLIENT.files().list().execute()
-    files = results.get('files', [])
-    if not files:
-        print('No files found in Google Drive.')
-    else:
-        for file in files:
-            if file_name_filter is None:
-                print(f"{file['name']} ({file['id']})")
-                # list_of_files.append((file['name'], file['id']))
-                list_of_files.append((file['id']))
-
-            elif file["name"].startswith(file_name_filter):
-                print(f"{file['name']} ({file['id']})")
-                # list_of_files.append((file['name'], file['id']))
-                list_of_files.append((file['id']))
-
-    return list_of_files
 
