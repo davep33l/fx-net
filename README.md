@@ -1,6 +1,6 @@
 # FX NET
 
-FX NET is a program that can parse FX trading data from a trade file and produce a breakdown/summary of netted ammounts by client, currency and value date. It can also produce formatted payment files for manual review and consumption into a downstream payment application for executing payments. 
+FX NET is a program that can parse FX (Foreign Exchange) trading data from a trade file and produce a breakdown/summary of netted ammounts by client, currency and value date. It can also produce formatted payment files for manual review and consumption into a downstream payment application for executing payments. 
 
 In finance and banking, operations staff currently perform manual calculations in order to net FX trading data for clients in order to send payments for the agreed FX trades executed. This is a time consuming process and has risks for manual error which can result in costs (overdraft charges).
 
@@ -18,7 +18,7 @@ Deployed here: [FX NET](https://fx-net-967232037eea.herokuapp.com/)
 
 #### What is an FX Trade
 
-An FX trade is an agreement to exchange currencies between two parties at an agreed exchange rate for an agreed value date. Where both parties will pay funds to agreed nominated bank accounts. 
+An FX trade is an agreement to exchange currencies between two parties at an agreed exchange rate for an agreed value date. Where both parties will pay funds to agreed nominated bank accounts. (Similar to going to the travel agent and exchanging GBP or EURs for USD ready for your holiday to Florida)
 
 Please see example below simplified flow of trade booking and non-netted (known as gross settlement) settlement flow
 
