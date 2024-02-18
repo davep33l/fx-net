@@ -4,6 +4,10 @@ FX NET is a program that can parse FX trading data from a trade file and produce
 
 In finance and banking, operations staff currently perform manual calculations in order to net FX trading data for clients in order to send payments for the agreed FX trades executed. This is a time consuming process and has risks for manual error which can result in costs (overdraft charges).
 
+Deployed here: [FX NET](https://fx-net-967232037eea.herokuapp.com/)
+
+![Hero](/readme/images/hero.png)
+
 ## Strategy
 
 **Business Goals**: To automate a manual process and reduce risk within a financial setting by netting FX transaction into netted payments. 
@@ -46,7 +50,7 @@ The simulator is set to create a file based on these contraints.
 1. Possible tradable currencies USD, EUR, GBP, JPY and CAD (and all relevant cross pairs, like USD/JPY and JPY/USD being two differently quoted prices)
 2. Trading mandate only allows for spot trading. Meaning that trades can only be value for the next possible value date. For example, if trades were booked on a Wednesday, the value date can only be a Thursday. 
 
-This project does not contain functionality of the downstream payment system. But it does consider an agreed payment format (which form the requirements) in which the payment system would want to receive payment message files once generated. These will be stored in a shared location ready for consumption of the downstream payment system. 
+This project does not contain functionality of the downstream payment system. But it does consider an agreed payment format (which formed the requirements) in which the payment system would want to receive payment message files once generated. These will be stored in a shared location ready for consumption of the downstream payment system. 
 
 ### High Level System Architecture
 
@@ -131,27 +135,47 @@ Currency, Amount, Client Payment Instructions
 
 - FX NET contains a record of files already loaded into the system to prevent duplication
 - FX NET contains the parsed data in a master TRADES table
-- FX NET will contain client payment information to merge with netting data to create downstream files / user reports
+- FX NET contains client payment information to merge with netting data to create downstream files / user reports
+
+## Standard Operation Procedure (How to use)
+
+The application is fairly simple in its navigation. However the user is expected to perform certain functions in order to get the desired result of seeing the netting breakdown / creating the payments.
+
+1. A trade file needs to be generated via the trading_simulator
+2. A trade file needs to be loaded into the fx_net application
+
+Once these requirements are complete, the reporting functionality will become avaiable with data. 
+
+** You are able to generate multiple trade files one after the other as required (for the demonstration purpose), and then load them in one after the other within fx_net
+
+A full demonstration of the workflow can be found in the TESTING.md file
 
 ## Important Links
 
-https://docs.google.com/spreadsheets/d/1DmgUmpsNXHFSekrgH9WajUaWs2eUkfRlWZsYw6504y4/edit?usp=sharing
+[fx_net_db](https://docs.google.com/spreadsheets/d/1DmgUmpsNXHFSekrgH9WajUaWs2eUkfRlWZsYw6504y4/edit?usp=sharing)
 
-https://docs.google.com/spreadsheets/d/1kbWMvUXe6WR4nqJg_5q7plLTB3eW3tVaQK06-hoY5cY/edit?usp=sharing
+[trading_simulator_db](https://docs.google.com/spreadsheets/d/1kbWMvUXe6WR4nqJg_5q7plLTB3eW3tVaQK06-hoY5cY/edit?usp=sharing)
+
+[FX NET](https://fx-net-967232037eea.herokuapp.com/)
 
 ## Deployment
 
 The project repo is stored on Github and was created as follows.
 
-1. New repo created using the code institute template
+1. New repo created using the [Code Insitiute Template](https://github.com/Code-Institute-Org/python-essentials-template)
+2. `git clone <repo> .` used to initalise locally
 
 
 The project was deployed using Heroku
 
-The project back end used google cloud
-
-
-
+1. Account set up with Heroku
+2. New project / app created
+3. Config variable added for `CREDS` for google api
+4. Config variable added for `PORT` 8000
+5. Build packs for heroku/python and heroku/nodejs
+6. Connection to gihub repo
+7. Deploy to main branch of github repo in deploy section on heroku
+8. Deployed here [FX NET](https://fx-net-967232037eea.herokuapp.com/)
 
 ## Development Environment
 
@@ -176,10 +200,12 @@ This project was developed solely in Python
 |[Google Cloud Console](https://console.cloud.google.com/)|Online Software|Backend| This was used to set up relevant API's and credential/keys to allow access to the Google Sheets "database" and Google Drive files.|
 |[`venv`](https://docs.python.org/3/library/venv.html)|Python Package/Library|Development|This was used to create a virtual environment for package management|
 |[`pandas`](https://pandas.pydata.org/docs/)|Python Package/Library| Misc|This was used to help with data manipulation within the application. `pyarrow` was installed additional as a dependency (and stop the pandas notification on its requirement to use)|
+|[`gspread`](https://docs.gspread.org/en/latest/)|Python Package/Library| Misc|This was used to interact with google sheets which was acting as the database|
 |[`google-auth`](https://google-auth.readthedocs.io/en/master/)|Python Package/Library| Misc|This was used to help with data manipulation within the application|
 |[`google-api-client-python`](https://github.com/googleapis/google-api-python-client)|Python Package/Library| Misc|This was used to help with data manipulation within the application|
+|[`rich`](https://rich.readthedocs.io/en/stable/introduction.html)|Python Package/Library|Development|This was used for printing colours to console and tables to console|
+|[`InquirerPy`](https://inquirerpy.readthedocs.io/en/latest/index.html)|Python Package/Library|Development|This was used for question propmts and user validation control for the menu system|
 |[draw.io](https://app.diagrams.net/)|Online Software|Flow Chars|This was used to create the flow charts and scenario diagrams|
-|[ui.dev/amiresponsive](https://ui.dev/amiresponsive)|Online Software| Misc| This was used to create the responsive image for the top of the readme|
 
 ## Testing
 
@@ -215,3 +241,5 @@ Thank you to my mentor who gave me encouragement to push myself again on this pr
 ## Additional Notes
 
 Throughout the course of the project, I tested and tried multiple different packages and libraries that may have had features that could improve this projects. I finally settled on the ones I have chosen, but want to call out that curses would have been a really cool package to use, however I had already implemented the menu system with InquirerPy and the presentation with rich and felt the implementation of curses would have made the application overly complex to complete within the deadline. 
+
+All information on the trade files are for demonstration purposes and do not reflect real world clients or client information. Bank names and BIC codes are reallife SWIFT BIC codes but the account numbers associated are fake and for demonstration purposes. 

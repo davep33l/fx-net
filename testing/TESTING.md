@@ -9,12 +9,6 @@ Evidence of first initial deployment to Heroku, proof of connection to googleshe
 ![Initial deployment test to Heroku](../testing/screenshots/heroku-deployment-test.png)
 
 
-
-# Tests to check when complete
-
-Check everything runs with data in the FX Net database and without it. 
-
-
 ## TESTING EMPTY DATABASE
 
 These tests are to check that the user is correctly prompted and informed that there is no data in the database to run the required actions. 
@@ -55,15 +49,43 @@ These tests are to check the relevant tables in either `trading_simulator_db` an
 | test11 | Test the `TRADES` table is updated. | Passed | See test10 for full details on functionality | ![](../testing/gifs/test11.gif) |
 
 
-## TESTING CONSOLE REPORTING UPDATES CORRECTLY
+## TESTING CALCULATIONS
+
+The below evidences the calculations performed are correct for both the spreadsheet and the console part of the program. 
 
 See [Netting Evidence Excel File](/testing/data/netting-evidence.xlsx) with calculation evidence. Needs to be opened in a spreadsheet application (Googlesheet/Excel etc)
 
-## TESTING SPREADSHEET REPORTS GENERATE CORRECTLY
+## TESTING FILES SEND EMAIL AND CAN OPEN
 
-## TESTING FILES GENERATE CORRECTLY
+Tested with an email address not associated with the developer (Wife) who was able to open the links
 
-## TESTING EXIT PROGRAM FOR EACH MENU
+## TESTING FULL DEMONSTRATION OF WORKFLOW OF THE APP
 
-## TESTING RETURN TO PREVIOUS MENU FOR EACH MENU
+![](../testing/gifs/full-workflow-of-app.gif)
+
+## BROWSER TESTS
+
+This was checked on Chrome and Firefox with no issues.
+But informed by my mentor that it did not work within Safari.
+
+## PEP8 Validation
+
+| Test ID | Description | Outcome | Comments | Evidence |
+|--------|-------------|---------|----------|----------|
+|test12|PEP8 Check on email.py|Passed||![](/testing/screenshots/test12.png)|
+|test13|PEP8 Check on utils.py|Passed||![](/testing/screenshots/test13.png)|
+|test14|PEP8 Check on database.py|Passed||![](/testing/screenshots/test14.png)|
+|test15|PEP8 Check on trading_simulator.py|Passed||![](/testing/screenshots/test15.png)|
+|test16|PEP8 Check on fx_net.py|Passed|1 line was 1 char too long, but left for readability|![](/testing/screenshots/test16.png)|
+|test17|PEP8 Check on app_selector.py|Passed||![](/testing/screenshots/test17.png)|
+|test18|PEP8 Check on run.py|Passed||![](/testing/screenshots/test18.png)|
+|test19|PEP8 Check on helper.py|Passed||![](/testing/screenshots/test19.png)|
+
+
+
+## FINAL DEPOLYMENT
+
+| Test ID | Description | Outcome | Comments | Evidence |
+|--------|-------------|---------|----------|----------|
+|test20|Final Deployment Evidence|Passed||![](/testing/screenshots/test20.png)|
 
