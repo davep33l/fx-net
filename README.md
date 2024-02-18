@@ -5,6 +5,7 @@ FX NET is a program that can parse FX (Foreign Exchange) trading data from a tra
 In finance and banking, operations staff currently perform manual calculations in order to net FX trading data for clients in order to send payments for the agreed FX trades executed. This is a time consuming process and has risks for manual error which can result in costs (overdraft charges).
 
 Deployed here: [FX NET](https://fx-net-967232037eea.herokuapp.com/)
+Github repo here: [Github](https://github.com/davep33l/fx-net)
 
 ![Hero](/readme/images/hero.png)
 
